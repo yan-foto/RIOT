@@ -1,0 +1,26 @@
+# Required RIOT modules
+USEMODULE += xtimer
+USEMODULE += gnrc_nettype_ndn
+ifneq (,$(filter ndn_lite_udp,$(USEMODULE)))
+	USEMODULE += gnrc_ipv6
+	USEMODULE += gnrc_udp
+endif
+
+# --------------- Base modules -------------------- #
+USEMODULE += ndn_lite_util
+USEMODULE += ndn_lite_encode
+USEMODULE += ndn_lite_forwarder
+USEMODULE += ndn_lite_security
+USEMODULE += ndn_lite_security_default-backend
+USEMODULE += ndn_lite_security_seclib_micro-ecc
+USEMODULE += ndn_lite_security_seclib_tinycrypt
+
+# --------------- Glue modules -------------------- #
+USEMODULE += ndn_lite_contrib_l2
+USEMODULE += ndn_lite_contrib_netface
+USEMODULE += ndn_lite_contrib_security
+USEMODULE += ndn_lite_contrib_util
+ifneq (,$(filter ndn_lite_udp,$(USEMODULE)))
+	USEMODULE += ndn_lite_contrib_udp
+endif
+USEMODULE += ndn_lite_contrib

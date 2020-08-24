@@ -1,0 +1,26 @@
+From 7a49007dcbf78bc654b0ca5b6a9cd77025de3248 Mon Sep 17 00:00:00 2001
+From: Yan Foto <yan.foto@quaintous.com>
+Date: Tue, 18 Aug 2020 13:21:59 +0200
+Subject: [PATCH 1/2] Remove redundant 'container_of' (included in RIOT).
+
+---
+ forwarder/face.h | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/forwarder/face.h b/forwarder/face.h
+index a09928b..3cb12ef 100644
+--- a/forwarder/face.h
++++ b/forwarder/face.h
+@@ -17,9 +17,6 @@
+ #include "../ndn-enums.h"
+ #include "../ndn-constants.h"
+ 
+-#define container_of(ptr, type, member) \
+-  ((type *)((char *)(1 ? (ptr) : &((type *)0)->member) - offsetof(type, member)))
+-
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+-- 
+2.20.1
+
