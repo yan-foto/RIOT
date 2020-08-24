@@ -1,0 +1,17 @@
+# Base directory of fetched NDN lite sources
+NDNIBASE = -I$(PKGDIRBASE)/ndn-lite
+# Package directory of NDN lite in RIOT
+NDNIRIOT = -I$(RIOTPKG)/ndn-lite
+
+INCLUDES += -I$(PKGDIRBASE)
+INCLUDES += $(NDNIBASE)/encode
+INCLUDES += $(NDNIBASE)/forwarder
+INCLUDES += $(NDNIBASE)/security
+INCLUDES += $(NDNIBASE)/security/default-backend
+INCLUDES += $(NDNIBASE)/security/default-backend/sec-lib/micro-ecc
+INCLUDES += $(NDNIBASE)/security/default-backend/sec-lib/tinycrypt
+
+INCLUDES += $(NDNIRIOT)/contrib
+DIRS += $(RIOTPKG)/ndn-lite/contrib
+
+PSEUDOMODULES += ndn-lite ndn_lite_contrib_udp ndn_lite_udp
