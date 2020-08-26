@@ -8,15 +8,17 @@
 
 
 #include "udp.h"
-#include "ndn-lite/ndn-error-code.h"
-#include "ndn-lite/ndn-constants.h"
-#include "ndn-lite/util/logger.h"
+
+#include <ndn-lite/ndn-error-code.h>
+#include <ndn-lite/ndn-constants.h>
+#include <ndn-lite/util/logger.h>
+
 #include <net/netopt.h>
 #include <net/gnrc/netapi.h>
 #include <net/gnrc/netif.h>
 #include <net/gnrc/netif/hdr.h>
 #include <net/gnrc/netreg.h>
-#include "net/gnrc/udp.h"
+#include <net/gnrc/udp.h>
 
 #define MAX_NET_QUEUE_SIZE 8
 static msg_t msg_q[MAX_NET_QUEUE_SIZE];

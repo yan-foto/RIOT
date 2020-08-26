@@ -10,14 +10,14 @@
 
 #include "netface/netface.h"
 
-#include "ndn-lite/encode/fragmentation-support.h"
+#include <ndn-lite/encode/fragmentation-support.h>
 #define ENABLE_NDN_LOG_ERROR 1
 #define ENABLE_NDN_LOG_DEBUG 1
 #define ENABLE_NDN_LOG_INFO 1
-#include "ndn-lite/util/logger.h"
-#include "ndn-lite/forwarder/forwarder.h"
-#include "ndn-lite/ndn-constants.h"
-#include "ndn-lite/security/ndn-lite-rng.h"
+#include <ndn-lite/util/logger.h>
+#include <ndn-lite/forwarder/forwarder.h>
+#include <ndn-lite/ndn-constants.h>
+#include <ndn-lite/security/ndn-lite-rng.h>
 
 #include <net/netopt.h>
 #include <net/gnrc/netapi.h>
@@ -28,8 +28,8 @@
 #include <thread.h>
 #include <timex.h>
 
-#include "stdio.h"
-#include "inttypes.h"
+#include <stdio.h>
+#include <inttypes.h>
 
 #define MAX_NET_QUEUE_SIZE 16
 

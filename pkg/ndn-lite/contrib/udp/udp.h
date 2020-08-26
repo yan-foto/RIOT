@@ -9,15 +9,14 @@
 #ifndef NDN_UDP_FACE_H_
 #define NDN_UDP_FACE_H_
 
-#include "ndn-lite/forwarder/forwarder.h"
-#include "ndn-lite/util/msg-queue.h"
+#include <ndn-lite/forwarder/forwarder.h>
+#include <ndn-lite/util/msg-queue.h>
 
-
-#include "net/gnrc.h"
-#include "net/gnrc/ipv6.h"
-#include "timex.h"
-#include "utlist.h"
-#include "xtimer.h"
+#include <net/gnrc.h>
+#include <net/gnrc/ipv6.h>
+#include <timex.h>
+#include <utlist.h>
+#include <xtimer.h>
 
 
 #ifdef __cplusplus
@@ -34,11 +33,11 @@ typedef struct ndn_udp_face {
    */
   ndn_face_intf_t intf;
   /*
-   * Local port used for UDP 
+   * Local port used for UDP
    */
   uint16_t local_port;
   /*
-   * Remote port used for UDP 
+   * Remote port used for UDP
    */
   uint16_t remote_port;
   /*

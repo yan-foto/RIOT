@@ -11,10 +11,8 @@
 #ifndef NDN_L2_H_
 #define NDN_L2_H_
 
-#include "ndn-lite/forwarder/face.h"
-#include "ndn-lite/encode/fragmentation-support.h"
-#include <kernel_types.h>
-#include <thread.h>
+#include <ndn-lite/forwarder/face.h>
+#include <ndn-lite/encode/fragmentation-support.h>
 
 #include <net/netopt.h>
 #include <net/gnrc/netapi.h>

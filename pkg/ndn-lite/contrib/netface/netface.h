@@ -11,8 +11,9 @@
 #ifndef NDN_NETFACE_H_
 #define NDN_NETFACE_H_
 
-#include "ndn-lite/forwarder/face.h"
-#include "ndn-lite/encode/fragmentation-support.h"
+#include <ndn-lite/forwarder/face.h>
+#include <ndn-lite/encode/fragmentation-support.h>
+
 #include <kernel_types.h>
 #include <thread.h>
 
