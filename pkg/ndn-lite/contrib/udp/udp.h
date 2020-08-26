@@ -18,38 +18,36 @@
 #include <utlist.h>
 #include <xtimer.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /*
  * UDP face adaptation
  */
 typedef struct ndn_udp_face {
-  /*
+	/*
    * The inherited interface.
    */
-  ndn_face_intf_t intf;
-  /*
+	ndn_face_intf_t intf;
+	/*
    * Local port used for UDP
    */
-  uint16_t local_port;
-  /*
+	uint16_t local_port;
+	/*
    * Remote port used for UDP
    */
-  uint16_t remote_port;
-  /*
+	uint16_t remote_port;
+	/*
    * Remote address used for UDP.
    * Should be IPv6 link-local multicast address
    */
-  ipv6_addr_t remote_addr;
+	ipv6_addr_t remote_addr;
 } ndn_udp_face_t;
 
-ndn_udp_face_t*
-ndn_udp_face_construct(uint16_t local_port, ipv6_addr_t remote_addr, uint16_t remote_port);
-
+ndn_udp_face_t *ndn_udp_face_construct(uint16_t local_port,
+				       ipv6_addr_t remote_addr,
+				       uint16_t remote_port);
 
 #ifdef __cplusplus
 }

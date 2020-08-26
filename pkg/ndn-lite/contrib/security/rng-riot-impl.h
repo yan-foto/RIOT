@@ -16,10 +16,8 @@
 /**
  * return 1 if runs successfully
  */
-int
-ndn_lite_riot_rng(uint8_t *dest, unsigned size);
+int ndn_lite_riot_rng(uint8_t *dest, unsigned size);
 
-void
-ndn_lite_riot_rng_load_backend(void);
+void ndn_lite_riot_rng_load_backend(void);
 
 #endif // RNG_RIOT_IMPL_H
