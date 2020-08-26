@@ -31,11 +31,17 @@
 #include <inttypes.h>
 
 #define MAX_NET_QUEUE_SIZE 8
-#define GNRC_NETIF_NUMOF 1
+/**
+ * @brief Max number of GNRC network interfaces
+ */
+#ifndef MAX_GNRC_NETIFS
+#define MAX_GNRC_NETIFS (1)
+#endif
+
 
 static msg_t msg_q[MAX_NET_QUEUE_SIZE];
 static gnrc_netreg_entry_t me_reg;
-static ndn_netface_t _netface_table[GNRC_NETIF_NUMOF];
+static ndn_netface_t _netface_table[MAX_GNRC_NETIFS];
 
 int
 ndn_netface_up(struct ndn_face_intf* self)
@@ -130,7 +136,7 @@ ndn_netface_auto_construct(void)
   gnrc_netreg_register(GNRC_NETTYPE_NDN, &me_reg);
 
   /* initialize the netif table entry */
-  for (int i = 0; i < GNRC_NETIF_NUMOF; ++i)
+  for (int i = 0; i < MAX_GNRC_NETIFS; ++i)
     _netface_table[i].intf.face_id = NDN_INVALID_ID;
 
   /* get list of interfaces */
