@@ -9,6 +9,8 @@
  * See AUTHORS.md for complete list of NDN IOT PKG authors and contributors.
  */
 
+#include "random.h"
+
 #include "rng-riot-impl.h"
 #include <ndn-lite/security/ndn-lite-rng.h>
 
