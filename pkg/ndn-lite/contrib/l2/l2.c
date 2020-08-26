@@ -17,6 +17,7 @@
 #include "ndn-lite/util/logger.h"
 #include "ndn-lite/forwarder/forwarder.h"
 #include "ndn-lite/ndn-constants.h"
+#include "ndn-lite/security/ndn-lite-rng.h"
 
 #include <net/netopt.h>
 #include <net/gnrc/netapi.h>
@@ -57,7 +58,7 @@ ndn_l2_send_packet(kernel_pid_t pid, gnrc_pktsnip_t* pkt)
   }
 
   NDN_LOG_DEBUG("successfully sent one gnrc packet (netface=%" PRIkernel_pid ")\n", pid);
-  NDN_LOG_DEBUG("forwarder sending: %" PRIu32 " ms\n", ndn_time_now_ms());
+  NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
   return 0;
 }
 
@@ -106,7 +107,7 @@ ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t* data,
                   "size=%d, netface=%" PRIkernel_pid ")\n",
                   (int)fragmenter.counter, fragmenter.frag_identifier, (int)size, pid);
   }
-  NDN_LOG_DEBUG("forwarder sending: %" PRIu32 " ms\n", ndn_time_now_ms());
+  NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
   return 0;
 }
 
@@ -136,7 +137,7 @@ ndn_l2_process_packet(ndn_face_intf_t* self, gnrc_pktsnip_t *pkt)
     /* release the gnrc packet */
     gnrc_pktbuf_release(pkt);
     if (face->assembler.is_finished) {
-      NDN_LOG_DEBUG("forwarder receiving: %" PRIu32 " ms\n", ndn_time_now_ms());
+      NDN_LOG_DEBUG("forwarder receiving: %llu ms\n", ndn_time_now_ms());
       ndn_forwarder_receive(self, face->frag_buffer, face->assembler.offset);
       ndn_frag_assembler_init(&face->assembler, face->frag_buffer, sizeof(face->frag_buffer));
       return 0;
@@ -144,7 +145,7 @@ ndn_l2_process_packet(ndn_face_intf_t* self, gnrc_pktsnip_t *pkt)
   }
 
   else {
-    NDN_LOG_DEBUG("forwarder receiving: %" PRIu32 " ms\n", ndn_time_now_ms());
+    NDN_LOG_DEBUG("forwarder receiving: %llu ms\n", ndn_time_now_ms());
     ndn_forwarder_receive(self, buf, len);
   }
 }
