@@ -12,7 +12,8 @@
 #include "netface/netface.h"
 #include "security/rng-riot-impl.h"
 #include "util/time.h"
-#include "ndn-lite/forwarder/forwarder.h"
+
+#include <ndn-lite/forwarder/forwarder.h>
 
 void
 ndn_lite_startup()

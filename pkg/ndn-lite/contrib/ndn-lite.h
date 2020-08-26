@@ -12,8 +12,8 @@
 #include <net/gnrc/netif.h>
 #include <net/gnrc/netreg.h>
 
-#include "ndn-lite/forwarder/forwarder.h"
-#include "ndn-lite/security/ndn-lite-sec-config.h"
+#include <ndn-lite/forwarder/forwarder.h>
+#include <ndn-lite/security/ndn-lite-sec-config.h>
 
 #define GNRC_NDN_LITE_MSG_QUEUE_SIZE    (8U)
 

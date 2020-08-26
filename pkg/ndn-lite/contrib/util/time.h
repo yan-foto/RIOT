@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include "xtimer.h"
-#include "timex.h"
+#include <ndn-lite/util/uniform-time.h>
 
-#include "ndn-lite/util/uniform-time.h"
+#include <xtimer.h>
+#include <timex.h>
+
+#include <stdio.h>
 
 ndn_time_ms_t ndn_time_now_ms(void){
    return xtimer_usec_from_ticks64(xtimer_now64()) / 1000;
