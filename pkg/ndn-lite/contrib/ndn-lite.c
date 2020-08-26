@@ -15,12 +15,11 @@
 
 #include <ndn-lite/forwarder/forwarder.h>
 
-void
-ndn_lite_startup()
+void ndn_lite_startup()
 {
-  register_platform_security_init(ndn_lite_riot_rng_load_backend);
-  ndn_security_init();
-  ndn_forwarder_init();
-  ndn_netface_auto_construct();
-  // ndn_netface_traverse_print();
+	register_platform_security_init(ndn_lite_riot_rng_load_backend);
+	ndn_security_init();
+	ndn_forwarder_init();
+	ndn_netface_auto_construct();
+	// ndn_netface_traverse_print();
 }

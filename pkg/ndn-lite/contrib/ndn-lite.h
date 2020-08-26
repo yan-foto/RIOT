@@ -15,7 +15,7 @@
 #include <ndn-lite/forwarder/forwarder.h>
 #include <ndn-lite/security/ndn-lite-sec-config.h>
 
-#define GNRC_NDN_LITE_MSG_QUEUE_SIZE    (8U)
+#define GNRC_NDN_LITE_MSG_QUEUE_SIZE (8U)
 
 // typedef struct ndn_lite_instance {
 //   // reference to forwarder
@@ -30,5 +30,4 @@
 //   gnrc_netreg_entry_t me_reg;
 // } ndn_lite_instance_t;
 
-void
-ndn_lite_startup(void);
+void ndn_lite_startup(void);
