@@ -15,7 +15,7 @@
 
 #include <ndn-lite/forwarder/forwarder.h>
 
-void ndn_lite_startup()
+void ndn_lite_startup(void)
 {
 	register_platform_security_init(ndn_lite_riot_rng_load_backend);
 	ndn_security_init();

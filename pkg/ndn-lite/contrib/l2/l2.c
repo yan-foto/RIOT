@@ -93,7 +93,7 @@ int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
 
 	uint16_t identifier = 0;
 	ndn_rng((uint8_t *)&identifier, sizeof(identifier));
-	ndn_fragmenter_init(&fragmenter, data, data_size, mtu, &identifier);
+	ndn_fragmenter_init(&fragmenter, data, data_size, mtu, identifier);
 
 	while (fragmenter.counter < fragmenter.total_frag_num) {
 		uint32_t size =
@@ -157,7 +157,6 @@ int ndn_l2_process_packet(ndn_face_intf_t *self, gnrc_pktsnip_t *pkt)
 			ndn_frag_assembler_init(&face->assembler,
 						face->frag_buffer,
 						sizeof(face->frag_buffer));
-			return 0;
 		}
 	}
 
@@ -166,5 +165,7 @@ int ndn_l2_process_packet(ndn_face_intf_t *self, gnrc_pktsnip_t *pkt)
 			      ndn_time_now_ms());
 		ndn_forwarder_receive(self, buf, len);
 	}
+
+	return 0;
 }
 /** @} */

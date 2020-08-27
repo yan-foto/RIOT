@@ -88,8 +88,7 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
 	return ndn_l2_send_packet(pid, pkt);
 }
 
-void ndn_netface_receive(ndn_face_intf_t *self, void *param,
-			 uint32_t param_size)
+void ndn_netface_receive(void *self, size_t param_length, void *param)
 {
 	msg_t msg, reply;
 
@@ -97,7 +96,8 @@ void ndn_netface_receive(ndn_face_intf_t *self, void *param,
 	reply.type = GNRC_NETAPI_MSG_TYPE_ACK;
 	int ret = msg_try_receive(&msg);
 	if (ret == -1) {
-		ndn_msgqueue_post(self, ndn_netface_receive, param, param_size);
+		ndn_msgqueue_post(self, ndn_netface_receive, param_length,
+				  param);
 		return;
 	}
 
@@ -119,7 +119,7 @@ void ndn_netface_receive(ndn_face_intf_t *self, void *param,
 		break;
 	}
 
-	ndn_msgqueue_post(self, ndn_netface_receive, param, param_size);
+	ndn_msgqueue_post(self, ndn_netface_receive, param_length, param);
 }
 
 uint32_t ndn_netface_auto_construct(void)
@@ -192,7 +192,7 @@ uint32_t ndn_netface_auto_construct(void)
 
 		/* posting a msgqueue netface receiving event */
 		ndn_msgqueue_post(&_netface_table[i].intf, ndn_netface_receive,
-				  NULL, 0);
+				  0, NULL);
 	}
 	return netface_num;
 }
