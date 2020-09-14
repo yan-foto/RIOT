@@ -1,4 +1,5 @@
 # Required RIOT modules
+USEMODULE += random
 USEMODULE += xtimer
 USEMODULE += gnrc_nettype_ndn
 ifneq (,$(filter ndn_lite_udp,$(USEMODULE)))
