@@ -2,7 +2,7 @@ PKG_NAME=ndn-lite
 PKG_URL=https://github.com/named-data-iot/ndn-lite
 # There is no release management for ndn-lite so the latest
 # known working reference is used here.
-PKG_VERSION=1b4f46bb3470ae0b31e768d105b34e9b7eeb33c1
+PKG_VERSION=d60a114a4c4e8422577ab8ae3817f79eed948254
 PKG_LICENSE=LGPLv3
 
 TDIR = $(RIOTPKG)/$(PKG_NAME)
