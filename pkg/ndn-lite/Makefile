@@ -35,6 +35,11 @@ all: $(NDN_MODULES) $(CONTRIB_MODULES)
 ndn_lite_%:
 	MODULE=$@ "$(MAKE)" -C $(PDIR)/$* -f $(TDIR)/Makefile.ndn-lite
 
+ndn_lite_forwarder:
+	NO_AUTO_SRC=1 \
+	SRC="$(filter-out name-splay.c,$(notdir $(wildcard $(PDIR)/forwarder/*.c)))" \
+	MODULE=$@ "$(MAKE)" -C $(PDIR)/forwarder -f $(TDIR)/Makefile.ndn-lite
+
 ndn_lite_security_%:
 	MODULE=$@ "$(MAKE)" -C $(PDIR)/security/$* -f $(TDIR)/Makefile.ndn-lite
 
