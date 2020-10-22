@@ -197,4 +197,10 @@ uint32_t ndn_netface_auto_construct(void)
 	return netface_num;
 }
 
+ndn_netface_t*
+ndn_netface_get_list(void)
+{
+  return _netface_table;
+}
+
 /** @} */
