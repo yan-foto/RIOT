@@ -60,11 +60,11 @@ int ndn_l2_send_packet(kernel_pid_t pid, gnrc_pktsnip_t *pkt)
 		return -1;
 	}
 
-	NDN_LOG_DEBUG(
-		"successfully sent one gnrc packet (netface=%" PRIkernel_pid
-		")\n",
-		pid);
-	NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
+// 	NDN_LOG_DEBUG(
+// 		"successfully sent one gnrc packet (netface=%" PRIkernel_pid
+// 		")\n",
+// 		pid);
+// 	NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
 	return 0;
 }
 
