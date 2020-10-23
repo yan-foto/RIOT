@@ -17,12 +17,13 @@
 
 int ndn_lite_riot_rng(uint8_t *dest, unsigned size)
 {
-	random_bytes(dest, size);
-	return 1;
+    random_bytes(dest, size);
+    return 1;
 }
 
 void ndn_lite_riot_rng_load_backend(void)
 {
-	ndn_rng_backend_t *backend = ndn_rng_get_backend();
-	backend->rng = ndn_lite_riot_rng;
+    ndn_rng_backend_t *backend = ndn_rng_get_backend();
+
+    backend->rng = ndn_lite_riot_rng;
 }

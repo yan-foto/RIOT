@@ -30,7 +30,7 @@ extern "C" {
 int ndn_l2_send_packet(kernel_pid_t pid, gnrc_pktsnip_t *pkt);
 
 int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
-			  uint32_t data_size, uint16_t mtu);
+                          uint32_t data_size, uint16_t mtu);
 int ndn_l2_process_packet(ndn_face_intf_t *self, gnrc_pktsnip_t *pkt);
 
 #ifdef __cplusplus
