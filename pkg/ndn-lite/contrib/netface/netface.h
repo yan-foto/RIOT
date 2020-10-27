@@ -58,5 +58,7 @@ uint32_t ndn_netface_auto_construct(void);
 }
 #endif
 
+ndn_netface_t *ndn_netface_get_list(void);
+
 #endif /* NETFACE_H */
 /** @} */
