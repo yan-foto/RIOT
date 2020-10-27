@@ -22,23 +22,23 @@
 extern "C" {
 #endif
 
-/*
+/**
  * UDP face adaptation
  */
 typedef struct ndn_udp_face {
-    /*
+    /**
      * The inherited interface.
      */
     ndn_face_intf_t intf;
-    /*
+    /**
      * Local port used for UDP
      */
     uint16_t local_port;
-    /*
+    /**
      * Remote port used for UDP
      */
     uint16_t remote_port;
-    /*
+    /**
      * Remote address used for UDP.
      * Should be IPv6 link-local multicast address
      */
