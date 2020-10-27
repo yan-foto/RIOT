@@ -6,8 +6,8 @@
  * directory for more details.
  */
 
-#ifndef NDN_UDP_FACE_H_
-#define NDN_UDP_FACE_H_
+#ifndef UDP_H
+#define UDP_H
 
 #include <ndn-lite/forwarder/forwarder.h>
 #include <ndn-lite/util/msg-queue.h>
@@ -53,4 +53,4 @@ ndn_udp_face_t *ndn_udp_face_construct(uint16_t local_port,
 }
 #endif
 
-#endif
+#endif /* UDP_H */
