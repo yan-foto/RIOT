@@ -85,7 +85,7 @@ void ndn_udp_face_destroy(ndn_face_intf_t *self)
     me_reg.target.pid = KERNEL_PID_UNDEF;
     ndn_face_down(self);
     ndn_forwarder_unregister_face(self);
-    NDN_LOG_DEBUG("UDP event unregisteration");
+    NDN_LOG_DEBUG("UDP event unregistration");
 }
 
 int ndn_udp_face_send(ndn_face_intf_t *self, const uint8_t *packet,
