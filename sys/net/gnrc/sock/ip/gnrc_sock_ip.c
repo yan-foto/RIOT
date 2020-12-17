@@ -15,6 +15,7 @@
  * @author  Martine Lenders <mlenders@inf.fu-berlin.de>
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 
@@ -194,7 +195,7 @@ ssize_t sock_ip_send(sock_ip_t *sock, const void *data, size_t len,
         gnrc_ep_set(&rem, remote, sizeof(rem));
     }
     if ((remote != NULL) && (remote->family == AF_UNSPEC) &&
-        (sock->remote.family != AF_UNSPEC)) {
+        (sock != NULL) && (sock->remote.family != AF_UNSPEC)) {
         /* remote was set on create so take its family */
         rem.family = sock->remote.family;
     }

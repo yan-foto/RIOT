@@ -71,7 +71,7 @@
 
 #include "lwip.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    0
 #include "debug.h"
 
 #ifdef MODULE_NETDEV_TAP
@@ -158,7 +158,7 @@ extern void stm32_eth_netdev_setup(netdev_t *netdev);
 #endif
 
 #ifdef MODULE_NRF802154
-extern netdev_ieee802154_t nrf802154_dev;
+static nrf802154_t nrf802154_dev;
 #endif
 
 /**
@@ -191,7 +191,7 @@ void lwip_bootstrap(void)
     }
 #elif defined(MODULE_MRF24J40)
     for (unsigned i = 0; i < LWIP_NETIF_NUMOF; i++) {
-        mrf24j40_setup(&mrf24j40_devs[i], &mrf24j40_params[i]);
+        mrf24j40_setup(&mrf24j40_devs[i], &mrf24j40_params[i], i);
         if (netif_add(&netif[i], &mrf24j40_devs[i], lwip_netdev_init,
                       tcpip_6lowpan_input) == NULL) {
             DEBUG("Could not add mrf24j40 device\n");
@@ -200,7 +200,7 @@ void lwip_bootstrap(void)
     }
 #elif defined(MODULE_AT86RF2XX)
     for (unsigned i = 0; i < LWIP_NETIF_NUMOF; i++) {
-        at86rf2xx_setup(&at86rf2xx_devs[i], &at86rf2xx_params[i]);
+        at86rf2xx_setup(&at86rf2xx_devs[i], &at86rf2xx_params[i], i);
         if (netif_add(&netif[i], &at86rf2xx_devs[i], lwip_netdev_init,
                       tcpip_6lowpan_input) == NULL) {
             DEBUG("Could not add at86rf2xx device\n");
@@ -218,7 +218,7 @@ void lwip_bootstrap(void)
     }
 #elif defined(MODULE_ENC28J60)
     for (unsigned i = 0; i < LWIP_NETIF_NUMOF; i++) {
-        enc28j60_setup(&enc28j60_devs[i], &enc28j60_params[i]);
+        enc28j60_setup(&enc28j60_devs[i], &enc28j60_params[i], i);
         if (_netif_add(&netif[0], &enc28j60_devs[i], lwip_netdev_init,
                        tcpip_input) == NULL) {
             DEBUG("Could not add enc28j60 device\n");
@@ -256,7 +256,8 @@ void lwip_bootstrap(void)
         return;
     }
 #elif defined(MODULE_NRF802154)
-    if (netif_add(&netif[0], &nrf802154_dev, lwip_netdev_init,
+    nrf802154_setup(&nrf802154_dev);
+    if (netif_add(&netif[0], (netdev_ieee802154_t *)&nrf802154_dev, lwip_netdev_init,
                 tcpip_6lowpan_input) == NULL) {
         DEBUG("Could not add nrf802154 device\n");
         return;

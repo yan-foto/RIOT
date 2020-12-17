@@ -13,6 +13,7 @@
  * @author  Martine Lenders <m.lenders@fu-berlin.de>
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
@@ -29,7 +30,7 @@
 #include "_nib-internal.h"
 #include "_nib-router.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /* pointers for default router selection */
@@ -110,11 +111,9 @@ _nib_onl_entry_t *_nib_onl_alloc(const ipv6_addr_t *addr, unsigned iface)
     if (node != NULL) {
         _override_node(addr, iface, node);
     }
-#if ENABLE_DEBUG
     else {
         DEBUG("  NIB full\n");
     }
-#endif  /* ENABLE_DEBUG */
     return node;
 }
 
@@ -527,7 +526,7 @@ static inline bool _in_dsts(const _nib_offl_entry_t *dst)
 #if IS_ACTIVE(CONFIG_GNRC_IPV6_NIB_MULTIHOP_P6C)
 static inline unsigned _idx_dsts(const _nib_offl_entry_t *dst)
 {
-    return (dst - _dsts) / sizeof(*dst);
+    return (dst - _dsts);
 }
 
 static inline bool _in_abrs(const _nib_abr_entry_t *abr)

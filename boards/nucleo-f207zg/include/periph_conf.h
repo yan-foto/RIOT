@@ -21,10 +21,21 @@
 #ifndef PERIPH_CONF_H
 #define PERIPH_CONF_H
 
+/* This board provides an LSE */
+#ifndef CONFIG_BOARD_HAS_LSE
+#define CONFIG_BOARD_HAS_LSE    1
+#endif
+
+/* This board provides an HSE */
+#ifndef CONFIG_BOARD_HAS_HSE
+#define CONFIG_BOARD_HAS_HSE    1
+#endif
+
 #include "periph_cpu.h"
-#include "f2/cfg_clock_120_8_1.h"
+#include "f2f4f7/cfg_clock_default_120.h"
 #include "cfg_i2c1_pb8_pb9.h"
 #include "cfg_usb_otg_fs.h"
+#include "mii.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -170,28 +181,8 @@ static const uart_conf_t uart_config[] = {
 
 /**
  * @name    SPI configuration
- *
- * @note    The spi_divtable is auto-generated from
- *          `cpu/stm32_common/dist/spi_divtable/spi_divtable.c`
  * @{
  */
-static const uint8_t spi_divtable[2][5] = {
-    {       /* for APB1 @ 30000000Hz */
-        7,  /* -> 117187Hz */
-        5,  /* -> 468750Hz */
-        4,  /* -> 937500Hz */
-        2,  /* -> 3750000Hz */
-        1   /* -> 7500000Hz */
-    },
-    {       /* for APB2 @ 60000000Hz */
-        7,  /* -> 234375Hz */
-        6,  /* -> 468750Hz */
-        5,  /* -> 937500Hz */
-        3,  /* -> 3750000Hz */
-        2   /* -> 7500000Hz */
-    }
-};
-
 static const spi_conf_t spi_config[] = {
     {
         .dev      = SPI1,
@@ -243,11 +234,12 @@ static const spi_conf_t spi_config[] = {
  * PIN, device (ADCx), channel
  * @{
  */
-#define ADC_CONFIG {              \
-    {GPIO_PIN(PORT_A, 3), 0, 3},  \
-    {GPIO_PIN(PORT_C, 0), 1, 0}  \
-}
-#define ADC_NUMOF          (2)
+static const adc_conf_t adc_config[] = {
+    {GPIO_PIN(PORT_A, 3), 0, 3},
+    {GPIO_PIN(PORT_C, 0), 1, 0}
+};
+
+#define ADC_NUMOF           ARRAY_SIZE(adc_config)
 /** @} */
 
 /**
@@ -256,11 +248,11 @@ static const spi_conf_t spi_config[] = {
  */
 static const eth_conf_t eth_config = {
     .mode = RMII,
-    .mac = { 0 },
-    .speed = ETH_SPEED_100TX_FD,
+    .addr = { 0 },
+    .speed = MII_BMCR_SPEED_100 | MII_BMCR_FULL_DPLX,
     .dma = 6,
     .dma_chan = 8,
-    .phy_addr = 0x01,
+    .phy_addr = 0x00,
     .pins = {
         GPIO_PIN(PORT_G, 13),
         GPIO_PIN(PORT_B, 13),
@@ -273,12 +265,6 @@ static const eth_conf_t eth_config = {
         GPIO_PIN(PORT_A, 1),
     }
 };
-
-#define ETH_RX_BUFFER_COUNT (4)
-#define ETH_TX_BUFFER_COUNT (4)
-
-#define ETH_RX_BUFFER_SIZE (1524)
-#define ETH_TX_BUFFER_SIZE (1524)
 
 #define ETH_DMA_ISR        isr_dma2_stream0
 

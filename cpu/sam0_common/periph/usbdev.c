@@ -18,6 +18,7 @@
 
 #define USB_H_USER_IS_RIOT_INTERNAL
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -35,7 +36,7 @@
  * is able to interfere with USB functionality and you might see different
  * errors than debug disabled
  */
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /* List of instantiated USB peripherals */
@@ -242,7 +243,7 @@ static inline void _poweron(sam0_common_usb_t *dev)
     PM->APBBMASK.reg |= PM_APBBMASK_USB;
 #endif
 
-#if defined(CPU_FAM_SAMD21)
+#if defined(CPU_COMMON_SAMD21)
     GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN
                       | GCLK_CLKCTRL_GEN(dev->config->gclk_src)
                       | GCLK_CLKCTRL_ID(USB_GCLK_ID);
@@ -294,14 +295,14 @@ static usbdev_ep_t *_usbdev_new_ep(usbdev_t *dev, usb_ep_type_t type,
 
 static void _block_pm(void)
 {
-#if defined(CPU_FAM_SAMD21)
+#if defined(CPU_COMMON_SAMD21)
     pm_block(SAMD21_PM_IDLE_1);
 #endif
 }
 
 static void _unblock_pm(void)
 {
-#if defined(CPU_FAM_SAMD21)
+#if defined(CPU_COMMON_SAMD21)
     pm_unblock(SAMD21_PM_IDLE_1);
 #endif
 }
@@ -363,7 +364,7 @@ static void _usbdev_init(usbdev_t *dev)
     _block_pm();
     usbdev->usbdev.cb(&usbdev->usbdev, USBDEV_EVENT_HOST_CONNECT);
     /* Interrupt configuration */
-#ifdef CPU_FAM_SAMD5X
+#ifdef CPU_COMMON_SAMD5X
     NVIC_EnableIRQ(USB_0_IRQn);
     NVIC_EnableIRQ(USB_1_IRQn);
     NVIC_EnableIRQ(USB_2_IRQn);

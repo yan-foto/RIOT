@@ -27,6 +27,9 @@ EXPECTED_PS = (
     '\t  \d | running  Q |   7'
 )
 
+RIOT_TERMINAL = os.environ.get('RIOT_TERMINAL')
+CLEANTERMS = {"socat"}
+
 # In native we are directly executing the binary (no terminal program). We must
 # therefore use Ctrl-V (DLE or "data link escape") before Ctrl-C to send a
 # literal ETX instead of SIGINT.
@@ -42,9 +45,9 @@ CONTROL_D = DLE+'\x04'
 PROMPT = '> '
 
 CMDS = (
-    # test start
     ('start_test', '[TEST_START]'),
-    (CONTROL_C, PROMPT),
+
+    # test empty line input
     ('\n', PROMPT),
 
     # test simple word separation
@@ -52,10 +55,7 @@ CMDS = (
     ('echo   multiple   spaces   between   argv', '"echo""multiple""spaces""between""argv"'),
     ('echo \t tabs\t\t processed \t\tlike\t \t\tspaces', '"echo""tabs""processed""like""spaces"'),
 
-    # test long line
-    ('123456789012345678901234567890123456789012345678901234567890',
-     'shell: command not found: '
-     '123456789012345678901234567890123456789012345678901234567890'),
+    # test unknown commands
     ('unknown_command', 'shell: command not found: unknown_command'),
 
     # test leading/trailing BLANK
@@ -96,14 +96,29 @@ CMDS = (
     ('ps', EXPECTED_PS),
     ('help', EXPECTED_HELP),
 
-    # test end
+    # test reboot
     ('reboot', 'test_shell.'),
+
     ('end_test', '[TEST_END]'),
 )
+
+CMDS_CLEANTERM = {
+    (CONTROL_C, PROMPT),
+}
 
 CMDS_REGEX = {'ps'}
 
 BOARD = os.environ['BOARD']
+
+# there's an issue with some boards' serial that causes lost characters.
+LINE_EXCEEDED_BLACKLIST = {
+    # There is an issue with nrf52dk when the Virtual COM port is connected
+    # and sending more than 64 bytes over UART. If no terminal is connected
+    # to the Virtual COM and interfacing directly to the nrf52832 UART pins
+    # the issue is not present. See issue #10639 on GitHub.
+    'nrf52dk',
+    'z1',
+}
 
 
 def print_error(message):
@@ -138,12 +153,8 @@ def check_and_get_bufsize(child):
 
 def check_line_exceeded(child, longline):
 
-    if BOARD == 'nrf52dk':
-        # There is an issue with nrf52dk when the Virtual COM port is connected
-        # and sending more than 64 bytes over UART. If no terminal is connected
-        # to the Virtual COM and interfacing directly to the nrf52832 UART pins
-        # the issue is not present. See issue #10639 on GitHub.
-        print_error('test case "check_line_exceeded" broken for nrf52dk. SKIP')
+    if BOARD in LINE_EXCEEDED_BLACKLIST:
+        print_error('test case "check_line_exceeded" blacklisted, SKIP')
         return
 
     child.sendline(longline)
@@ -169,25 +180,47 @@ def check_erase_long_line(child, longline):
         child.expect_exact('"echo"')
 
 
+def check_control_d(child):
+    # The current shell instance was initiated by shell_run_once(). The shell will exit.
+    child.sendline(CONTROL_D)
+    child.expect_exact('shell exited')
+
+    # The current shell instance was initiated by shell_run(). The shell will respawn
+    # automatically except on native. On native, RIOT is shut down completely,
+    # therefore exclude this part.
+    if BOARD != 'native':
+        child.sendline(CONTROL_D)
+        child.expect_exact(PROMPT)
+
+
 def testfunc(child):
     # avoid sending an extra empty line on native.
     if BOARD == 'native':
         child.crlf = '\n'
-
-    check_startup(child)
 
     bufsize = check_and_get_bufsize(child)
     longline = "_"*bufsize + "verylong"
 
     check_line_exceeded(child, longline)
 
-    check_line_canceling(child)
+    if RIOT_TERMINAL in CLEANTERMS:
+        check_line_canceling(child)
+    else:
+        print("skipping check_line_canceling()")
 
     check_erase_long_line(child, longline)
+
+    check_control_d(child)
 
     # loop other defined commands and expected output
     for cmd, expected in CMDS:
         check_cmd(child, cmd, expected)
+
+    if RIOT_TERMINAL in CLEANTERMS:
+        for cmd, expected in CMDS_CLEANTERM:
+            check_cmd(child, cmd, expected)
+    else:
+        print("skipping cleanterm tests")
 
 
 if __name__ == "__main__":

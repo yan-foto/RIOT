@@ -21,13 +21,12 @@
 #include "periph_cpu.h"
 #include "periph_conf.h"
 #include "mutex.h"
-#include "assert.h"
 #include "bitarithm.h"
 #include "pm_layered.h"
 #include "thread_flags.h"
 #include "periph/gpio.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifndef CONFIG_DMA_NUMOF
@@ -81,7 +80,7 @@ void dma_init(void)
     NVIC_EnableIRQ(DMAC_1_IRQn);
     NVIC_EnableIRQ(DMAC_2_IRQn);
     NVIC_EnableIRQ(DMAC_3_IRQn);
-#elif defined(CPU_FAM_SAMD5X)
+#elif defined(CPU_COMMON_SAMD5X)
     NVIC_EnableIRQ(DMAC_0_IRQn);
     NVIC_EnableIRQ(DMAC_1_IRQn);
     NVIC_EnableIRQ(DMAC_2_IRQn);

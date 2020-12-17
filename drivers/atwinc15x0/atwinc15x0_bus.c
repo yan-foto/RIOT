@@ -18,10 +18,12 @@
  * @}
  */
 
+#include <assert.h>
+
 #include "atwinc15x0_internal.h"
 #include "bus_wrapper/include/nm_bus_wrapper.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #define NM_BUS_MAX_TRX_SZ   256
@@ -36,7 +38,7 @@ sint8 nm_bus_init(void *arg)
     (void)arg;
 
     assert(atwinc15x0);
-    assert(atwinc15x0->params.ssn_pin != GPIO_UNDEF);
+    assert(gpio_is_valid(atwinc15x0->params.ssn_pin));
 
     gpio_init(atwinc15x0->params.ssn_pin, GPIO_OUT);
     gpio_set(atwinc15x0->params.ssn_pin);

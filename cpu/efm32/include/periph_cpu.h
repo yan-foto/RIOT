@@ -20,6 +20,7 @@
 #ifndef PERIPH_CPU_H
 #define PERIPH_CPU_H
 
+#include "kernel_defines.h"
 #include "mutex.h"
 
 #include "cpu_conf.h"
@@ -30,6 +31,7 @@
 #include "em_gpio.h"
 #include "em_timer.h"
 #include "em_usart.h"
+#include "em_wdog.h"
 #if defined(_SILICON_LABS_32B_SERIES_0)
 #include "em_dac.h"
 #endif
@@ -92,6 +94,11 @@ typedef struct {
  * @brief   Length of CPU ID in octets.
  */
 #define CPUID_LEN           (8U)
+
+/**
+ * @brief   CPU Frequency Define
+ */
+#define CLOCK_CORECLOCK     SystemCoreClock
 
 #if defined(DAC_COUNT) && DAC_COUNT > 0
 /**
@@ -348,16 +355,26 @@ typedef struct {
  * @{
  */
 typedef struct {
-    TIMER_TypeDef *dev;     /**< Timer device used */
+    void *dev;              /**< TIMER_TypeDef or LETIMER_TypeDef device used */
     CMU_Clock_TypeDef cmu;  /**< the device CMU channel */
 } timer_dev_t;
 
 typedef struct {
-    timer_dev_t prescaler;  /**< the lower numbered neighboring timer */
+    timer_dev_t prescaler;  /**< the lower neighboring timer (not initialized for LETIMER) */
     timer_dev_t timer;      /**< the higher numbered timer */
     IRQn_Type irq;          /**< number of the higher timer IRQ channel */
+    uint8_t channel_numof;       /**< number of channels per timer */
 } timer_conf_t;
 /** @} */
+
+
+/**
+ * @brief   Use LETIMER as the base timer for XTIMER
+ */
+#ifndef CONFIG_EFM32_XTIMER_USE_LETIMER
+#define CONFIG_EFM32_XTIMER_USE_LETIMER   0
+#endif
+
 
 /**
  * @brief   UART device configuration.
@@ -420,6 +437,23 @@ typedef struct {
  * @brief   Number of usable power modes.
  */
 #define PM_NUM_MODES    (2U)
+
+/**
+ * @name    Watchdog timer (WDT) configuration
+ * @{
+ */
+#define WDT_CLOCK_HZ            (1000U)
+
+#define NWDT_TIME_LOWER_LIMIT   ((1U << (3U + wdogPeriod_9)) + 1U)
+#define NWDT_TIME_UPPER_LIMIT   ((1U << (3U + wdogPeriod_256k)) + 1U)
+
+#ifdef _SILICON_LABS_32B_SERIES_1
+#define WDT_TIME_LOWER_LIMIT    NWDT_TIME_LOWER_LIMIT
+#define WDT_TIME_UPPER_LIMIT    NWDT_TIME_UPPER_LIMIT
+#endif
+
+#define WDT_HAS_STOP            (1U)
+/** @} */
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <errno.h>
 
 #include "thread.h"
@@ -30,7 +31,7 @@
 #include "can/can_trx.h"
 #endif
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifndef CAN_DEVICE_MSG_QUEUE_SIZE
@@ -503,7 +504,7 @@ int can_device_calc_bittiming(uint32_t clock, const struct can_bittiming_const *
          tseg >= timing_const->tseg1_min + timing_const->tseg2_min; tseg--) {
         uint32_t nbt = tseg + CAN_SYNC_SEG;
 
-        /* theoritical brp */
+        /* theoretical brp */
         uint32_t brp = clock / (timing->bitrate * nbt);
         /* brp according to brp_inc */
         brp = (brp / timing_const->brp_inc) * timing_const->brp_inc;

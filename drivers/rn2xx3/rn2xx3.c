@@ -28,7 +28,7 @@
 #include "rn2xx3.h"
 #include "rn2xx3_internal.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    0
 /* Warning: to correctly display the debug message from sleep timer callback,,
    add CFLAGS+=-DTHREAD_STACKSIZE_IDLE=THREAD_STACKSIZE_DEFAULT to the build
    command.
@@ -38,7 +38,7 @@
 /**
  * @brief   Delay when resetting the device, 10ms
  */
-#define RESET_DELAY                 (10UL * US_PER_MS)
+#define RESET_DELAY     (10UL * US_PER_MS)
 
 /*
  * Interrupt callbacks
@@ -140,7 +140,7 @@ void rn2xx3_setup(rn2xx3_t *dev, const rn2xx3_params_t *params)
     dev->p = *params;
 
     /* initialize pins and perform hardware reset */
-    if (dev->p.pin_reset != GPIO_UNDEF) {
+    if (gpio_is_valid(dev->p.pin_reset)) {
         gpio_init(dev->p.pin_reset, GPIO_OUT);
         gpio_set(dev->p.pin_reset);
     }
@@ -162,7 +162,7 @@ int rn2xx3_init(rn2xx3_t *dev)
     }
 
     /* if reset pin is connected, do a hardware reset */
-    if (dev->p.pin_reset != GPIO_UNDEF) {
+    if (gpio_is_valid(dev->p.pin_reset)) {
         gpio_clear(dev->p.pin_reset);
         xtimer_usleep(RESET_DELAY);
         gpio_set(dev->p.pin_reset);

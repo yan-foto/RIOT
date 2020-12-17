@@ -43,7 +43,7 @@
 
 #include "native_internal.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #if ENABLE_DEBUG
 #define LOCAL_DEBUG (1)
 #endif
@@ -125,11 +125,11 @@ void _native_syscall_leave(void)
             && (_native_in_isr == 0)
             && (_native_in_syscall == 0)
             && (native_interrupts_enabled == 1)
-            && (sched_active_thread != NULL)
+            && (thread_get_active() != NULL)
        )
     {
         _native_in_isr = 1;
-        _native_cur_ctx = (ucontext_t *)sched_active_thread->sp;
+        _native_cur_ctx = (ucontext_t *)thread_get_active()->sp;
         native_isr_context.uc_stack.ss_sp = __isr_stack;
         native_isr_context.uc_stack.ss_size = SIGSTKSZ;
         native_isr_context.uc_stack.ss_flags = 0;
@@ -277,8 +277,10 @@ char *make_message(const char *format, va_list argp)
 
     while (1) {
         int n = vsnprintf(message, size, format, argp);
-        if (n < 0)
+        if (n < 0) {
+            free(message);
             return NULL;
+        }
         if (n < size)
             return message;
         size = n + 1;

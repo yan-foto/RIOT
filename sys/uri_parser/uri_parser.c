@@ -18,9 +18,11 @@
  * @}
  */
 
+#include <assert.h>
+
 #include "uri_parser.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /* strchr for non-Null-terminated strings (buffers) */

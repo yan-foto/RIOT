@@ -8,7 +8,7 @@ STDIO_MODULES = \
   stdio_uart \
   #
 
-ifneq (,$(filter newlib,$(USEMODULE)))
+ifneq (,$(filter newlib picolibc,$(USEMODULE)))
   ifeq (,$(filter $(STDIO_MODULES),$(USEMODULE)))
     USEMODULE += stdio_uart
   endif
@@ -44,14 +44,14 @@ ifneq (,$(filter stdio_uart,$(USEMODULE)))
   FEATURES_REQUIRED += periph_uart
 endif
 
-ifeq (,$(filter stdio_cdc_acm,$(USEMODULE)))
-  # The arduino and nrfutil bootloader features cannot be used if the
-  # stdio_cdc_acm module is not used
-  FEATURES_BLACKLIST += bootloader_arduino
-  FEATURES_BLACKLIST += bootloader_nrfutil
-endif
-
 ifneq (,$(filter stdio_semihosting,$(USEMODULE)))
   USEMODULE += xtimer
   FEATURES_REQUIRED += cpu_core_cortexm
+endif
+
+# enable stdout buffering for modules that benefit from sending out buffers in larger chunks
+ifneq (,$(filter picolibc,$(USEMODULE)))
+  ifneq (,$(filter stdio_cdc_acm stdio_ethos slipdev_stdio stdio_semihosting,$(USEMODULE)))
+    USEMODULE += picolibc_stdout_buffered
+  endif
 endif

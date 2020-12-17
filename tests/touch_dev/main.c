@@ -19,7 +19,6 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <stdbool.h>
 
 #include "xtimer.h"
@@ -37,7 +36,7 @@ static stmpe811_t stmpe811;
 static void _touch_event_cb(void *arg)
 {
     (void)arg;
-    puts("Pressed!");
+    printf("Event: ");
 }
 
 int main(void)
@@ -61,7 +60,10 @@ int main(void)
 
         if (current_touches != last_touches) {
             if (current_touches == 0) {
-                puts("Released!");
+                puts("released!");
+            }
+            if (current_touches > 0) {
+                puts("pressed!");
             }
             last_touches = current_touches;
         }

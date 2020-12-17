@@ -7,6 +7,7 @@ USEMODULE += gnrc_netdev_default
 USEMODULE += auto_init_gnrc_netif
 USEMODULE += gnrc_lorawan
 USEMODULE += gnrc_pktdump
+USEMODULE += gnrc_neterr
 
 BOARD ?= b-l072z-lrwan1
 RIOTBASE ?= ../../
@@ -56,3 +57,8 @@ CFLAGS += -DLORAMAC_DEFAULT_JOIN_PROCEDURE=LORAMAC_JOIN_OTAA
 CFLAGS += -DLORAMAC_DEFAULT_TX_MODE=LORAMAC_TX_CNF
 
 include $(RIOTBASE)/Makefile.include
+
+# Set region
+ifeq (,$(CONFIG_LORAMAC_REGION_EU_868)$(CONFIG_LORAMAC_REGION_IN_865))
+    CFLAGS += -DCONFIG_LORAMAC_REGION_EU_868=1
+endif

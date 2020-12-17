@@ -20,6 +20,8 @@
 #include "net/gnrc/netif.h"
 #include "net/ipv6/addr.h"
 
+#include "timex.h"
+
 static void _usage(char **argv);
 static int _nib_neigh(int argc, char **argv);
 static int _nib_prefix(int argc, char **argv);
@@ -136,7 +138,10 @@ static int _nib_neigh(int argc, char **argv)
             _usage_nib_neigh(argv);
             return 1;
         }
-        gnrc_ipv6_nib_nc_set(&ipv6_addr, iface, l2addr, l2addr_len);
+        if (gnrc_ipv6_nib_nc_set(&ipv6_addr, iface, l2addr, l2addr_len) < 0) {
+            printf("Unable to add %s%%%u to neighbor cache\n",
+                   argv[4], iface);
+        }
     }
     else if ((argc > 3) && (strcmp(argv[2], "del") == 0)) {
         ipv6_addr_t ipv6_addr;

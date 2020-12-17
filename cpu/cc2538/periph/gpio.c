@@ -21,12 +21,14 @@
  * @}
  */
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "cpu.h"
+#include "bitarithm.h"
 #include "periph/gpio.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #define MODE_NOTSUP         (0xff)
@@ -222,10 +224,9 @@ static inline void handle_isr(uint8_t port_num)
 
     /* mask all non-GPIO bits */
     state &= (1 << GPIO_BITS_PER_PORT) - 1;
+    uint8_t pin = 0;
     while (state) {
-        /* we want the position of the first one bit, so N_bits - (N_zeros + 1) */
-        int pin = 32 - __builtin_clz(state) - 1;
-        state &= ~(1 << pin);
+        state = bitarithm_test_and_clear(state, &pin);
         isr_ctx[port_num][pin].cb(isr_ctx[port_num][pin].arg);
     }
 

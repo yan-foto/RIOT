@@ -4,11 +4,14 @@ APPLICATION = ndn-lite-producer
 # If no BOARD is found in the environment, use this default:
 BOARD ?= native
 
+<<<<<<< HEAD
 BOARD_INSUFFICIENT_MEMORY := airfy-beacon chronos msb-430 msb-430h nrf51dongle \
                           nrf6310 nucleo-f103 nucleo-f334 pca10000 pca10005 spark-core \
                           stm32f0discovery telosb weio wsn430-v1_3b wsn430-v1_4 \
                           yunjia-nrf51822 z1
 
+=======
+>>>>>>> 44466f92c83fae95ba1786a6a7ffeec0cc946929
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../..
 

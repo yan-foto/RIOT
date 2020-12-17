@@ -104,7 +104,7 @@ static int test_send(void)
         puts("Could not allocate send header");
         return 0;
     }
-    LL_PREPEND(pkt, hdr);
+    pkt = gnrc_pkt_prepend(pkt, hdr);
     /* prepare expected data */
     memcpy(exp_mac->dst, _test_dst, sizeof(_test_dst));
     memcpy(exp_mac->src, _dev_addr, sizeof(_dev_addr));
@@ -135,7 +135,7 @@ static int test_receive(void)
     uint8_t *rcv_payload = _tmp + sizeof(ethernet_hdr_t);
     gnrc_pktsnip_t *pkt, *hdr;
     gnrc_netreg_entry_t me = GNRC_NETREG_ENTRY_INIT_PID(GNRC_NETREG_DEMUX_CTX_ALL,
-                                                        sched_active_pid);
+                                                        thread_getpid());
     msg_t msg;
 
     if (_dev.netdev.event_callback == NULL) {

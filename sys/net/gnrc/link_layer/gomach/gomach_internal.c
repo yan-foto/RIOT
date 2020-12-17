@@ -17,6 +17,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include "periph/rtt.h"
@@ -33,9 +34,6 @@
 #include "net/gnrc/netif/ieee802154.h"
 #include "net/netdev/ieee802154.h"
 
-#define ENABLE_DEBUG    (0)
-#include "debug.h"
-
 #ifndef LOG_LEVEL
 /**
  * @brief Default log level define
@@ -44,6 +42,9 @@
 #endif
 
 #include "log.h"
+
+#define ENABLE_DEBUG 0
+#include "debug.h"
 
 int _gnrc_gomach_transmit(gnrc_netif_t *netif, gnrc_pktsnip_t *pkt)
 {
@@ -175,7 +176,7 @@ static int _parse_packet(gnrc_netif_t *netif, gnrc_pktsnip_t *pkt,
     gnrc_netif_hdr_set_netif(netif_hdr, netif);
     pkt->type = state->proto;
     gnrc_pktbuf_remove_snip(pkt, pkt->next);
-    LL_APPEND(pkt, netif_snip);
+    pkt = gnrc_pkt_append(pkt, netif_snip);
 
     gnrc_pktsnip_t *gomach_snip = NULL;
     gnrc_gomach_hdr_t *gomach_hdr = NULL;

@@ -5,7 +5,6 @@ BOARD_INSUFFICIENT_MEMORY := \
     arduino-nano \
     arduino-uno \
     atmega328p \
-    chronos \
     hifive1 \
     hifive1b \
     i-nucleo-lrwan1 \
@@ -19,10 +18,12 @@ BOARD_INSUFFICIENT_MEMORY := \
     nucleo-f072rb \
     nucleo-f303k8 \
     nucleo-f334r8 \
+    nucleo-l011k4 \
     nucleo-l031k6 \
     nucleo-l053r8 \
     saml10-xpro \
     saml11-xpro \
+    stk3200 \
     stm32f030f4-demo \
     stm32f0discovery \
     stm32l0538-disco \

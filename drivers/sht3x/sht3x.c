@@ -13,10 +13,11 @@
  * @file
  */
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 #include "log.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 

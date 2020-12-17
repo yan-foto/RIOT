@@ -29,7 +29,7 @@
 #include "bitarithm.h"
 #include "net/nanocoap.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /**
@@ -374,6 +374,11 @@ int coap_get_blockopt(coap_pkt_t *pkt, uint16_t option, uint32_t *blknum, unsign
     uint8_t *data_start = _parse_option(pkt, optpos, &delta, &option_len);
     if (!data_start) {
         DEBUG("nanocoap: invalid start data\n");
+        return -1;
+    }
+
+    if (option_len > 4) {
+        DEBUG("nanocoap: invalid option length\n");
         return -1;
     }
 

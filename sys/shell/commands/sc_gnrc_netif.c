@@ -18,6 +18,7 @@
  * @author      Oliver Hahm <oliver.hahm@inria.fr>
  */
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -82,7 +83,7 @@ static const struct {
 /* utility functions */
 static void _print_iface_name(netif_t *iface)
 {
-    char name[NETIF_NAMELENMAX];
+    char name[CONFIG_NETIF_NAMELENMAX];
     netif_get_name(iface, name);
     printf("%s", name);
 }
@@ -784,7 +785,7 @@ static void _netif_list(netif_t *iface)
         puts("\n           Black-listed link layer addresses:");
 #endif
         int count = 0;
-        for (unsigned i = 0; i < L2FILTER_LISTSIZE; i++) {
+        for (unsigned i = 0; i < CONFIG_L2FILTER_LISTSIZE; i++) {
             if (filter[i].addr_len > 0) {
                 char hwaddr_str[filter[i].addr_len * 3];
                 gnrc_netif_addr_to_str(filter[i].addr, filter[i].addr_len,
@@ -1242,7 +1243,7 @@ static int _netif_addrm_l2filter(netif_t *iface, char *val, bool add)
     uint8_t addr[GNRC_NETIF_L2ADDR_MAXLEN];
     size_t addr_len = gnrc_netif_addr_from_str(val, addr);
 
-    if ((addr_len == 0) || (addr_len > L2FILTER_ADDR_MAXLEN)) {
+    if ((addr_len == 0) || (addr_len > CONFIG_L2FILTER_ADDR_MAXLEN)) {
         puts("error: given address is invalid");
         return 1;
     }
@@ -1593,7 +1594,7 @@ int _gnrc_netif_send(int argc, char **argv)
         gnrc_pktbuf_release(pkt);
         return 1;
     }
-    LL_PREPEND(pkt, hdr);
+    pkt = gnrc_pkt_prepend(pkt, hdr);
     nethdr = (gnrc_netif_hdr_t *)hdr->data;
     nethdr->flags = flags;
     /* and send it */

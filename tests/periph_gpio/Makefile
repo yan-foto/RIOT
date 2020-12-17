@@ -1,14 +1,22 @@
 include ../Makefile.tests_common
 
-FEATURES_REQUIRED = periph_gpio
-FEATURES_OPTIONAL = periph_gpio_irq
+FEATURES_REQUIRED += periph_gpio
+FEATURES_OPTIONAL += periph_gpio_irq
+FEATURES_OPTIONAL += periph_gpio_fast_read
+FEATURES_OPTIONAL += periph_gpio_tamper_wake
 
 USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += benchmark
 
+# disable native GPIOs for automatic test
+ifeq (native,$(BOARD))
+  USEMODULE += periph_gpio_mock
+endif
+
 BOARDS_BENCH_PORT_1 = \
     slstk3402a \
+    z1 \
     #
 
 # port 0 pins are used for serial output on these boards, e.g.: on slstk3402a

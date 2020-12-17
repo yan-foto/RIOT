@@ -32,6 +32,7 @@
 #include "board.h"
 #include "mpu.h"
 #include "panic.h"
+#include "sched.h"
 #include "vectors_cortexm.h"
 #ifdef MODULE_PUF_SRAM
 #include "puf_sram.h"
@@ -140,10 +141,6 @@ void reset_handler_default(void)
     }
 #endif /* CPU_HAS_BACKUP_RAM */
 
-#if defined(MODULE_MPU_STACK_GUARD) || defined(MODULE_MPU_NOEXEC_RAM)
-    mpu_enable();
-#endif
-
 #ifdef MODULE_MPU_NOEXEC_RAM
     /* Mark the RAM non executable. This is a protection mechanism which
      * makes exploitation of buffer overflows significantly harder.
@@ -169,12 +166,16 @@ void reset_handler_default(void)
     }
 #endif
 
+#if defined(MODULE_MPU_STACK_GUARD) || defined(MODULE_MPU_NOEXEC_RAM)
+    mpu_enable();
+#endif
+
     post_startup();
 
     /* initialize the board (which also initiates CPU initialization) */
     board_init();
 
-#if MODULE_NEWLIB
+#if MODULE_NEWLIB || MODULE_PICOLIBC
     /* initialize std-c library (this must be done after board_init) */
     extern void __libc_init_array(void);
     __libc_init_array();
@@ -372,6 +373,20 @@ __attribute__((used)) void hard_fault_handler(uint32_t* sp, uint32_t corrupted, 
     printf("EXC_RET: 0x%08" PRIx32 "\n", exc_return);
 
     if (!corrupted) {
+        /* Test if the EXC_RETURN returns to thread mode,
+         * to check if the hard fault happened in ISR context */
+        if (exc_return & 0x08) {
+            kernel_pid_t active_pid = thread_getpid();
+            printf("Active thread: %"PRIi16" \"%s\"\n",
+                   active_pid, thread_getname(active_pid));
+        }
+        else {
+            /* Print the interrupt number, NMI being -14, hardfault is -13,
+             * IRQ0 is 0 and so on */
+            uint32_t psr = sp[7];  /* Program status register. */
+            printf("Hard fault occurred in ISR number %d\n",
+                   (int)(psr & 0xff) - 16);
+        }
         puts("Attempting to reconstruct state for debugging...");
         printf("In GDB:\n  set $pc=0x%" PRIx32 "\n  frame 0\n  bt\n", pc);
         int stack_left = _stack_size_left(HARDFAULT_HANDLER_REQUIRED_STACK_SPACE);
@@ -422,8 +437,9 @@ void hard_fault_default(void)
 
 #endif /* DEVELHELP */
 
-#if defined(CPU_CORE_CORTEX_M3) || defined(CPU_CORE_CORTEX_M4) || \
-    defined(CPU_CORE_CORTEX_M4F) || defined(CPU_CORE_CORTEX_M7)
+#if defined(CPU_CORE_CORTEX_M3) || defined(CPU_CORE_CORTEX_M33) || \
+    defined(CPU_CORE_CORTEX_M4) || defined(CPU_CORE_CORTEX_M4F) || \
+    defined(CPU_CORE_CORTEX_M7)
 void mem_manage_default(void)
 {
     core_panic(PANIC_MEM_MANAGE, "MEM MANAGE HANDLER");
@@ -488,9 +504,10 @@ ISR_VECTOR(0) const cortexm_base_t cortex_vector_base = {
         [9] = (isr_t)(CORTEXM_VECTOR_RESERVED_0X28),
         #endif  /* CORTEXM_VECTOR_RESERVED_0X28 */
 
-        /* additional vectors used by M3, M4(F), and M7 */
-#if defined(CPU_CORE_CORTEX_M3) || defined(CPU_CORE_CORTEX_M4) || \
-    defined(CPU_CORE_CORTEX_M4F) || defined(CPU_CORE_CORTEX_M7)
+        /* additional vectors used by M3, M33, M4(F), and M7 */
+#if defined(CPU_CORE_CORTEX_M3) || defined(CPU_CORE_CORTEX_M33) || \
+    defined(CPU_CORE_CORTEX_M4) || defined(CPU_CORE_CORTEX_M4F) || \
+    defined(CPU_CORE_CORTEX_M7)
         /* [-12] memory manage exception */
         [ 3] = mem_manage_default,
         /* [-11] bus fault exception */

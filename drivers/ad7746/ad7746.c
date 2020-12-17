@@ -18,6 +18,8 @@
  * @}
  */
 
+#include <assert.h>
+
 #include "ad7746.h"
 #include "ad7746_params.h"
 #include "ad7746_internal.h"
@@ -25,7 +27,7 @@
 #include "periph/i2c.h"
 #include "periph/gpio.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #include "xtimer.h"

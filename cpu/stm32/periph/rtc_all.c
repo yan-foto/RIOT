@@ -147,7 +147,7 @@
 #endif
 
 /* figure out sync and async prescaler */
-#if CLOCK_LSE
+#if IS_ACTIVE(CONFIG_BOARD_HAS_LSE)
 #define PRE_SYNC            (255)
 #define PRE_ASYNC           (127)
 #elif (CLOCK_LSI == 40000)
@@ -163,13 +163,12 @@
 #error "rtc: unable to determine RTC SYNC and ASYNC prescalers from LSI value"
 #endif
 
-/* struct tm counts years since 1900 but RTC has only two-digit year hence the
- * offset of 100 years. */
-#define YEAR_OFFSET         (100)
+/* struct tm counts years since 1900 but RTC has only two-digit year, hence the offset */
+#define YEAR_OFFSET         (RIOT_EPOCH - 1900)
 
 /* Use a magic number to determine the initial RTC source. This will be used
    to know if a reset of the RTC is required at initialization. */
-#if CLOCK_LSE
+#if IS_ACTIVE(CONFIG_BOARD_HAS_LSE)
 #define MAGIC_CLCK_NUMBER       (0x1970)
 #else
 #define MAGIC_CLCK_NUMBER       (0x1971)
@@ -242,7 +241,7 @@ void rtc_init(void)
     /* select input clock and enable the RTC */
     stmclk_dbp_unlock();
     EN_REG &= ~(CLKSEL_MASK);
-#if CLOCK_LSE
+#if IS_ACTIVE(CONFIG_BOARD_HAS_LSE)
     EN_REG |= (CLKSEL_LSE | EN_BIT);
 #else
     EN_REG |= (CLKSEL_LSI | EN_BIT);
@@ -273,7 +272,7 @@ int rtc_set_time(struct tm *time)
 
     rtc_unlock();
 
-    RTC->DR = (val2bcd((time->tm_year % 100), RTC_DR_YU_Pos, DR_Y_MASK) |
+    RTC->DR = (val2bcd((time->tm_year - YEAR_OFFSET), RTC_DR_YU_Pos, DR_Y_MASK) |
                val2bcd(time->tm_mon + 1,  RTC_DR_MU_Pos, DR_M_MASK) |
                val2bcd(time->tm_mday, RTC_DR_DU_Pos, DR_D_MASK));
     RTC->TR = (val2bcd(time->tm_hour, RTC_TR_HU_Pos, TR_H_MASK) |

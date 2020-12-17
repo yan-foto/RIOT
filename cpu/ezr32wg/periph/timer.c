@@ -23,7 +23,7 @@
 #include "periph/timer.h"
 #include "periph_conf.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /**
@@ -135,4 +135,4 @@ void TIMER_0_ISR(void)
     }
     cortexm_isr_end();
 }
-#endif /* TIMER_0_EN */
+#endif /* TIMER_0_ISR */

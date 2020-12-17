@@ -55,14 +55,14 @@
 
 #include "ble-mac.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    0
 #include "debug.h"
 
 #if defined(MODULE_OD) && ENABLE_DEBUG
 #include "od.h"
 #endif
 
-#define BLE_PRIO                    (GNRC_NETIF_PRIO)
+#define BLE_PRIO        (GNRC_NETIF_PRIO)
 
 /* XXX: netdev required by gnrc_netif, but not implemented fully for
  * nordic_softdevice_ble for legacy reasons */
@@ -119,7 +119,7 @@ static void _handle_raw_sixlowpan(ble_mac_inbuf_t *inbuf)
     od_hex_dump(inbuf->payload, inbuf->len, OD_WIDTH_DEFAULT);
 #endif
 
-    LL_APPEND(pkt, netif_hdr);
+    pkt = gnrc_pkt_append(pkt, netif_hdr);
 
     /* throw away packet if no one is interested */
     if (!gnrc_netapi_dispatch_receive(pkt->type, GNRC_NETREG_DEMUX_CTX_ALL, pkt)) {

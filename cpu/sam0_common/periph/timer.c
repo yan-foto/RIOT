@@ -20,6 +20,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -29,7 +30,7 @@
 #include "periph/timer.h"
 #include "periph_conf.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /**
@@ -145,7 +146,7 @@ int timer_init(tim_t tim, unsigned long freq, timer_cb_t cb, void *arg)
         return -1;
     }
 
-    /* make sure the prescaler is withing range */
+    /* make sure the prescaler is within range */
     if (scale > TC_CTRLA_PRESCALER_DIV1024_Val) {
         DEBUG("[timer %d] scale %d is out of range\n", tim, scale);
         return -1;

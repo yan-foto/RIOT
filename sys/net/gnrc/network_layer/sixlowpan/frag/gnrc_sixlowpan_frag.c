@@ -27,11 +27,13 @@
 #include "net/sixlowpan.h"
 #include "utlist.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #if ENABLE_DEBUG
 /* For PRIu16 etc. */
+
+#include <assert.h>
 #include <inttypes.h>
 #endif
 
@@ -116,9 +118,7 @@ static gnrc_pktsnip_t *_build_frag_pkt(gnrc_pktsnip_t *pkt,
     frag_hdr->tag = byteorder_htons(fbuf->tag);
 
 
-    LL_PREPEND(frag, netif);
-
-    return frag;
+    return gnrc_pkt_prepend(frag, netif);
 }
 
 static uint16_t _copy_pkt_to_frag(uint8_t *data, const gnrc_pktsnip_t *pkt,
@@ -148,7 +148,7 @@ static uint16_t _send_1st_fragment(gnrc_netif_t *iface,
      * datagram_size: size of the uncompressed IPv6 packet */
     int payload_diff = _payload_diff(fbuf, payload_len);
     uint16_t local_offset;
-    /* virtually add payload_diff to flooring to account for offset (must be divisable by 8)
+    /* virtually add payload_diff to flooring to account for offset (must be dividable by 8)
      * in uncompressed datagram */
     uint16_t max_frag_size = _floor8(_max_frag_size(iface, fbuf) +
                                      payload_diff - sizeof(sixlowpan_frag_t)) -

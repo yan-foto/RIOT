@@ -11,6 +11,8 @@
  *
  * @author      Javier FILEIV <javier.fileiv@gmail.com>
  */
+
+#include <assert.h>
 #include <string.h>
 #include <errno.h>
 
@@ -27,13 +29,13 @@
 #include "tsrb.h"
 #include "log.h"
 
-#define ENABLE_DEBUG                        (0)
+#define ENABLE_DEBUG        0
 #include "debug.h"
 
-#define IP_MAX_LEN_ADDRESS                  (39)    /*IPv6 max length */
+#define IP_MAX_LEN_ADDRESS  (39)    /*IPv6 max length */
 
 #ifndef TSRB_MAX_SIZE
-#define TSRB_MAX_SIZE                       (1024)
+#define TSRB_MAX_SIZE       (1024)
 #endif
 
 #ifdef MODULE_LWIP
@@ -43,7 +45,7 @@ static tsrb_t tsrb_lwip_tcp;
 #endif
 
 #ifndef PAHO_MQTT_YIELD_MS
-#define PAHO_MQTT_YIELD_MS                  (10)
+#define PAHO_MQTT_YIELD_MS  (10)
 #endif
 
 static int mqtt_read(struct Network *n, unsigned char *buf, int len,

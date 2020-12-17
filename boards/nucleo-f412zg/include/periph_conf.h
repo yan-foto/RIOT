@@ -21,8 +21,18 @@
 #ifndef PERIPH_CONF_H
 #define PERIPH_CONF_H
 
+/* This board provides an LSE */
+#ifndef CONFIG_BOARD_HAS_LSE
+#define CONFIG_BOARD_HAS_LSE    1
+#endif
+
+/* This board provides an HSE */
+#ifndef CONFIG_BOARD_HAS_HSE
+#define CONFIG_BOARD_HAS_HSE    1
+#endif
+
 #include "periph_cpu.h"
-#include "f4/cfg_clock_100_8_1.h"
+#include "f2f4f7/cfg_clock_default_100.h"
 #include "cfg_i2c1_pb8_pb9.h"
 #include "cfg_timer_tim5.h"
 #include "cfg_usb_otg_fs.h"
@@ -134,28 +144,8 @@ static const pwm_conf_t pwm_config[] = {
 
 /**
  * @name    SPI configuration
- *
- * @note    The spi_divtable is auto-generated from
- *          `cpu/stm32_common/dist/spi_divtable/spi_divtable.c`
  * @{
  */
-static const uint8_t spi_divtable[2][5] = {
-    {       /* for APB1 @ 50000000Hz */
-        7,  /* -> 195312Hz */
-        6,  /* -> 390625Hz */
-        5,  /* -> 781250Hz */
-        2,  /* -> 6250000Hz */
-        1   /* -> 12500000Hz */
-    },
-    {       /* for APB2 @ 100000000Hz */
-        7,  /* -> 390625Hz */
-        7,  /* -> 390625Hz */
-        6,  /* -> 781250Hz */
-        3,  /* -> 6250000Hz */
-        2   /* -> 12500000Hz */
-    }
-};
-
 static const spi_conf_t spi_config[] = {
     {
         .dev            = SPI1,
@@ -191,15 +181,16 @@ static const spi_conf_t spi_config[] = {
  *
  * @{
  */
-#define ADC_NUMOF          (6U)
-#define ADC_CONFIG {              \
-    {GPIO_PIN(PORT_A, 3), 0, 3},  \
-    {GPIO_PIN(PORT_C, 0), 0, 10}, \
-    {GPIO_PIN(PORT_C, 3), 0, 13}, \
-    {GPIO_PIN(PORT_C, 1), 0, 11}, \
-    {GPIO_PIN(PORT_C, 4), 0, 14}, \
-    {GPIO_PIN(PORT_C, 5), 0, 15}, \
-}
+static const adc_conf_t adc_config[] = {
+    {GPIO_PIN(PORT_A, 3), 0, 3},
+    {GPIO_PIN(PORT_C, 0), 0, 10},
+    {GPIO_PIN(PORT_C, 3), 0, 13},
+    {GPIO_PIN(PORT_C, 1), 0, 11},
+    {GPIO_PIN(PORT_C, 4), 0, 14},
+    {GPIO_PIN(PORT_C, 5), 0, 15},
+};
+
+#define ADC_NUMOF           ARRAY_SIZE(adc_config)
 /** @} */
 
 #ifdef __cplusplus

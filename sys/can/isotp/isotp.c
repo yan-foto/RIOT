@@ -16,6 +16,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 
@@ -30,7 +31,7 @@
 #include "timex.h"
 #include "utlist.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifndef CAN_ISOTP_MSG_QUEUE_SIZE
@@ -670,7 +671,7 @@ static void *_isotp_thread(void *args)
     /* setup the device layers message queue */
     msg_init_queue(msg_queue, CAN_ISOTP_MSG_QUEUE_SIZE);
 
-    isotp_pid = sched_active_pid;
+    isotp_pid = thread_getpid();
 
     while (1) {
         msg_receive(&msg);

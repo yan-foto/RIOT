@@ -18,15 +18,17 @@
  * @}
  */
 
+#include <assert.h>
 #include <limits.h>
 
 #include "log.h"
 #include "random.h"
 #include "byteorder.h"
+#include "timex.h"
 
 #include "net/asymcute.h"
 
-#define ENABLE_DEBUG            (0)
+#define ENABLE_DEBUG            0
 #include "debug.h"
 
 #define PROTOCOL_VERSION        (0x01)

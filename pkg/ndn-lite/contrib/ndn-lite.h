@@ -17,17 +17,4 @@
 
 #define GNRC_NDN_LITE_MSG_QUEUE_SIZE (8U)
 
-// typedef struct ndn_lite_instance {
-//   // reference to forwarder
-//   ndn_forwarder_t* forwarder;
-
-//   // RIOT message queue
-//   msg_t msg;
-//   msg_t reply;
-//   msg_t msg_q[GNRC_NDN_LITE_MSG_QUEUE_SIZE];
-
-//   // RIOT network stack registeration entry
-//   gnrc_netreg_entry_t me_reg;
-// } ndn_lite_instance_t;
-
 void ndn_lite_startup(void);

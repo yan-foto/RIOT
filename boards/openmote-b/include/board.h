@@ -23,6 +23,7 @@
 
 #include "cpu.h"
 #include "periph/gpio.h"
+#include "cc2538_eui_primary.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -74,6 +75,15 @@
 #define RF24_SWITCH_AT86RF215_ON     (RF_SWITCH_PORT->DATA &= ~RF24_SWITCH_AT86RF215_MASK)
 #define RF24_SWITCH_AT86RF215_OFF    (RF_SWITCH_PORT->DATA |=  RF24_SWITCH_AT86RF215_MASK)
 #define RF24_SWITCH_AT86RF215_TOGGLE (RF_SWITCH_PORT->DATA ^=  RF24_SWITCH_AT86RF215_MASK)
+/** @} */
+
+/**
+ * @name    RF CORE observable signals settings
+ * @{
+ */
+#define CONFIG_CC2538_RF_OBS_SIG_0_PCX  5   /* PC5 */
+#define CONFIG_CC2538_RF_OBS_SIG_1_PCX  6   /* PC6 */
+#define CONFIG_CC2538_RF_OBS_SIG_2_PCX  7   /* PC7 */
 /** @} */
 
 /**

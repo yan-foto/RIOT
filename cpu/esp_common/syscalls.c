@@ -18,6 +18,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <string.h>
 #include <stdio_ext.h>
 #include <sys/unistd.h>
@@ -36,7 +37,7 @@
 #include "malloc.h"
 #endif
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifndef MODULE_PTHREAD
@@ -157,7 +158,7 @@ void IRAM_ATTR _lock_acquire(_lock_t *lock)
     }
 
     /* if scheduler is not running, we have not to lock the mutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return;
     }
 
@@ -175,7 +176,7 @@ void IRAM_ATTR _lock_acquire_recursive(_lock_t *lock)
     }
 
     /* if scheduler is not running, we have not to lock the rmutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return;
     }
 
@@ -193,7 +194,7 @@ int IRAM_ATTR _lock_try_acquire(_lock_t *lock)
     }
 
     /* if scheduler is not running, we have not to lock the mutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return 0;
     }
 
@@ -214,7 +215,7 @@ int IRAM_ATTR _lock_try_acquire_recursive(_lock_t *lock)
     }
 
     /* if scheduler is not running, we have not to lock the rmutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return 0;
     }
 
@@ -230,7 +231,7 @@ void IRAM_ATTR _lock_release(_lock_t *lock)
     assert(lock != NULL && *lock != 0);
 
     /* if scheduler is not running, we have not to unlock the mutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return;
     }
 
@@ -242,7 +243,7 @@ void IRAM_ATTR _lock_release_recursive(_lock_t *lock)
     assert(lock != NULL && *lock != 0);
 
     /* if scheduler is not running, we have not to unlock the rmutex */
-    if (sched_active_thread == NULL) {
+    if (thread_get_active() == NULL) {
         return;
     }
 

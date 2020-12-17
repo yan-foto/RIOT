@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #include "can/dll.h"
@@ -49,13 +49,13 @@ void auto_init_candev(void)
     isotp_init(isotp_stack, ISOTP_STACK_SIZE, ISOTP_PRIORITY, "isotp");
 #endif
 
-#ifdef MODULE_CAN_LINUX
-    extern void auto_init_can_native(void);
-    auto_init_can_native();
-#endif
-
 #ifdef MODULE_PERIPH_CAN
     extern void auto_init_periph_can(void);
     auto_init_periph_can();
+#endif
+
+#ifdef MODULE_MCP2515
+    extern void auto_init_can_mcp2515(void);
+    auto_init_can_mcp2515();
 #endif
 }

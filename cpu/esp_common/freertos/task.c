@@ -10,9 +10,10 @@
 
 #ifndef DOXYGEN
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
+#include <assert.h>
 #include <string.h>
 
 #include "esp_common.h"
@@ -103,6 +104,7 @@ BaseType_t xTaskCreate (TaskFunction_t pvTaskCode,
 
 void vTaskDelete (TaskHandle_t xTaskToDelete)
 {
+    extern volatile thread_t *sched_active_thread;
     DEBUG("%s pid=%d task=%p\n", __func__, thread_getpid(), xTaskToDelete);
 
     assert(xTaskToDelete != NULL);

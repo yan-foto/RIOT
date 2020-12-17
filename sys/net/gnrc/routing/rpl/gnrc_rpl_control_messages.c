@@ -16,6 +16,7 @@
  * @author Cenk Gündoğan <cenk.guendogan@haw-hamburg.de>
  */
 
+#include <assert.h>
 #include <string.h>
 #include "kernel_defines.h"
 
@@ -42,7 +43,7 @@
 #include "net/gnrc/rpl/p2p.h"
 #endif
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 static char addr_str[IPV6_ADDR_MAX_STR_LEN];
@@ -224,7 +225,7 @@ void gnrc_rpl_send(gnrc_pktsnip_t *pkt, kernel_pid_t iface, ipv6_addr_t *src, ip
         return;
     }
     gnrc_netif_hdr_set_netif(hdr->data, netif);
-    LL_PREPEND(pkt, hdr);
+    pkt = gnrc_pkt_prepend(pkt, hdr);
 
     if (!gnrc_netapi_dispatch_send(GNRC_NETTYPE_IPV6, GNRC_NETREG_DEMUX_CTX_ALL, pkt)) {
         DEBUG("RPL: cannot send packet: no subscribers found.\n");
@@ -997,6 +998,10 @@ void gnrc_rpl_send_DAO(gnrc_rpl_instance_t *inst, ipv6_addr_t *destination, uint
         return;
     }
     idx = gnrc_netif_ipv6_addr_match(netif, &dodag->dodag_id);
+    if (idx < 0) {
+        DEBUG("RPL: no address matching DODAG ID found\n");
+        return;
+    }
     me = &netif->ipv6.addrs[idx];
 
     /* add external and RPL FT entries */

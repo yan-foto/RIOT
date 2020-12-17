@@ -14,6 +14,7 @@
  * @author  Cenk Gündoğan <cenk.guendogan@haw-hamburg.de>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "net/icmpv6.h"
@@ -26,7 +27,7 @@
 #include "net/gnrc/rpl/p2p_structs.h"
 #include "net/gnrc/rpl/p2p_dodag.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG                    0
 #include "debug.h"
 
 #if ENABLE_DEBUG

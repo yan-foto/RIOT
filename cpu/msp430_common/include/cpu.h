@@ -28,7 +28,6 @@
 
 #include "sched.h"
 #include "thread.h"
-#include "msp430_types.h"
 #include "cpu_conf.h"
 
 #ifdef __cplusplus
@@ -51,11 +50,6 @@ extern "C" {
 extern volatile int __irq_is_in;
 
 /**
- * @brief   Memory used as stack for the interrupt context
- */
-extern char __isr_stack[ISR_STACKSIZE];
-
-/**
  * @brief   Save the current thread context from inside an ISR
  */
 static inline void __attribute__((always_inline)) __save_context(void)
@@ -73,7 +67,7 @@ static inline void __attribute__((always_inline)) __save_context(void)
     __asm__("push r5");
     __asm__("push r4");
 
-    __asm__("mov.w r1,%0" : "=r"(sched_active_thread->sp));
+    __asm__("mov.w r1,%0" : "=r"(thread_get_active()->sp));
 }
 
 /**
@@ -81,7 +75,7 @@ static inline void __attribute__((always_inline)) __save_context(void)
  */
 static inline void __attribute__((always_inline)) __restore_context(void)
 {
-    __asm__("mov.w %0,r1" : : "m"(sched_active_thread->sp));
+    __asm__("mov.w %0,r1" : : "m"(thread_get_active()->sp));
 
     __asm__("pop r4");
     __asm__("pop r5");
@@ -103,8 +97,9 @@ static inline void __attribute__((always_inline)) __restore_context(void)
  */
 static inline void __attribute__((always_inline)) __enter_isr(void)
 {
+    extern char __stack;    /* defined by linker script to end of RAM */
     __save_context();
-    __asm__("mov.w %0,r1" : : "i"(__isr_stack + ISR_STACKSIZE));
+    __asm__("mov.w %0,r1" : : "i"(&__stack));
     __irq_is_in = 1;
 }
 

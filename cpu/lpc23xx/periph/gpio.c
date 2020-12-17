@@ -19,16 +19,16 @@
  * @}
  */
 
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "irq.h"
 #include "periph/gpio.h"
+#include "bitarithm.h"
 #include "bitfield.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifdef MODULE_PERIPH_GPIO_IRQ
@@ -273,9 +273,10 @@ static void test_irq(int port, unsigned long active_pins)
     /* Test each bit of rising and falling masks, if set trigger interrupt
      * on corresponding device */
 
+    uint8_t pin = 0;
     while (active_pins) {
-        /* we want the position of the first one bit, so N_bits - (N_leading_zeros + 1) */
-        unsigned pin = 32 - __builtin_clz(active_pins) - 1;
+        /* get the index of the next set pin */
+        active_pins = bitarithm_test_and_clear(active_pins, &pin);
 
         /* get the index of the configured interrupt */
         int _state_index = _gpio_isr_map[_isr_map_entry2(port, pin)];
@@ -284,9 +285,6 @@ static void test_irq(int port, unsigned long active_pins)
         if (_state_index != 0xff) {
             _gpio_states[_state_index].cb(_gpio_states[_state_index].arg);
         }
-
-        /* clear bit */
-        active_pins &= ~(1 << pin);
     }
 }
 

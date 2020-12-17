@@ -24,6 +24,8 @@
 #include "periph/gpio.h"
 #include "periph/spi.h"
 
+#include "mtd.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,11 +33,18 @@ extern "C" {
 /**
  * @name    Xtimer configuration
  *
- * The timer runs at 250 KHz to increase accuracy.
+ * The timer runs at 250 kHz to increase accuracy or 32768 Hz for LETIMER.
  * @{
  */
+#if IS_ACTIVE(CONFIG_EFM32_XTIMER_USE_LETIMER)
+#define XTIMER_DEV          (TIMER_DEV(1))
+#define XTIMER_HZ           (32768UL)
+#else
+#define XTIMER_DEV          (TIMER_DEV(0))
 #define XTIMER_HZ           (250000UL)
+#endif
 #define XTIMER_WIDTH        (16)
+#define XTIMER_CHAN (0)
 /** @} */
 
 /**
@@ -56,6 +65,31 @@ extern "C" {
 #define LED1_ON             gpio_set(LED1_PIN)
 #define LED1_OFF            gpio_clear(LED1_PIN)
 #define LED1_TOGGLE         gpio_toggle(LED1_PIN)
+/** @} */
+
+/**
+ * @name    SPI NOR Flash hardware configuration
+ *
+ * The board has a IS25LQ020B flash chip (2MBit).
+ */
+/** @{ */
+#define IKEA_TRADFRI_NOR_PAGE_SIZE          (256)
+#define IKEA_TRADFRI_NOR_PAGES_PER_SECTOR   (16)
+#define IKEA_TRADFRI_NOR_SECTOR_COUNT       (64)
+#define IKEA_TRADFRI_NOR_FLAGS              (SPI_NOR_F_SECT_4K | SPI_NOR_F_SECT_32K)
+#define IKEA_TRADFRI_NOR_SPI_DEV            SPI_DEV(0)
+#define IKEA_TRADFRI_NOR_SPI_CLK            SPI_CLK_1MHZ
+#define IKEA_TRADFRI_NOR_SPI_CS             GPIO_PIN(PB, 11)
+#define IKEA_TRADFRI_NOR_SPI_MODE           SPI_MODE_0
+#define IKEA_TRADFRI_NOR_EN                 GPIO_PIN(PF, 3) /**< only on the ICC-1-A */
+/** @} */
+
+/**
+ * @name    MTD configuration
+ */
+/** @{ */
+extern mtd_dev_t *mtd0;
+#define MTD_0 mtd0
 /** @} */
 
 /**

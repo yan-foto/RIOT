@@ -29,7 +29,7 @@
 #include "cc2420_netdev.h"
 #include "cc2420_registers.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 
@@ -87,7 +87,7 @@ int cc2420_init(cc2420_t *dev)
     cc2420_reg_write(dev, CC2420_REG_MDMCTRL0, reg);
 
     /* go into RX state */
-    cc2420_set_state(dev, CC2420_GOTO_RX);
+    cc2420_set_state(dev, NETOPT_STATE_IDLE);
 
     return 0;
 }

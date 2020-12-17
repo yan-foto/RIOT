@@ -5,16 +5,14 @@ BOARD ?= native
 TAP ?= tap0
 
 # Shorten default TCP timeouts to speedup testing
-MSL_US ?= 1000000
-TIMEOUT_US ?= 3000000
+MSL_MS ?= 1000
+TIMEOUT_MS ?= 3000
 
 # This test depends on tap device setup (only allowed by root)
 # Suppress test execution to avoid CI errors
 TEST_ON_CI_BLACKLIST += all
 
 CFLAGS += -DSHELL_NO_ECHO
-CFLAGS += -DGNRC_NETIF_SINGLE           # Only one interface used and it makes
-                                        # shell commands easier
 
 ifeq (native,$(BOARD))
   TERMFLAGS ?= $(TAP)
@@ -30,6 +28,8 @@ USEMODULE += auto_init_gnrc_netif
 USEMODULE += gnrc_ipv6_default
 USEMODULE += gnrc_tcp
 USEMODULE += gnrc_pktbuf_cmd
+USEMODULE += gnrc_netif_single          # Only one interface used and it makes
+                                        # shell commands easier
 USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += od
@@ -45,12 +45,12 @@ ethos:
 include $(RIOTBASE)/Makefile.include
 
 # Set CONFIG_GNRC_TCP_MSL via CFLAGS if not being set via Kconfig
-ifndef CONFIG_GNRC_TCP_MSL
-  CFLAGS += -DCONFIG_GNRC_TCP_MSL=$(MSL_US)
+ifndef CONFIG_GNRC_TCP_MSL_MS
+  CFLAGS += -DCONFIG_GNRC_TCP_MSL_MS=$(MSL_MS)
 endif
 
 # Set CONFIG_GNRC_TCP_CONNECTION_TIMEOUT_DURATION via CFLAGS if not being set
 # via Kconfig
-ifndef CONFIG_GNRC_TCP_CONNECTION_TIMEOUT_DURATION
-  CFLAGS += -DCONFIG_GNRC_TCP_CONNECTION_TIMEOUT_DURATION=$(TIMEOUT_US)
+ifndef CONFIG_GNRC_TCP_CONNECTION_TIMEOUT_DURATION_MS
+  CFLAGS += -DCONFIG_GNRC_TCP_CONNECTION_TIMEOUT_DURATION_MS=$(TIMEOUT_MS)
 endif

@@ -16,7 +16,6 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <inttypes.h>
 #include <errno.h>
 
@@ -25,7 +24,7 @@
 
 #include "native_internal.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 static int _init(mtd_dev_t *dev)

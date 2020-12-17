@@ -15,6 +15,7 @@
  * @}
  */
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -23,9 +24,8 @@
 
 #include "irq.h"
 #include "log.h"
-#include "xtimer.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #if ENABLE_DEBUG
@@ -355,7 +355,7 @@ int apds99xx_int_config(apds99xx_t *dev, apds99xx_int_config_t* cfg,
 {
     assert(dev != NULL);
     assert(cfg != NULL);
-    assert(dev->params.int_pin != GPIO_UNDEF);
+    assert(gpio_is_valid(dev->params.int_pin));
     assert(cfg->als_pers <= 15);
     assert(cfg->prx_pers <= 15);
 

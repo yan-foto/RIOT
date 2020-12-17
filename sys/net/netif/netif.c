@@ -13,6 +13,7 @@
  * @author  Jose I. Alamos <jose.alamos@haw-hamburg.de>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "errno.h"
@@ -56,11 +57,11 @@ netif_t *netif_get_by_name(const char *name)
     assert(name);
     list_node_t *node = netif_list.next;
 
-    char tmp[NETIF_NAMELENMAX];
+    char tmp[CONFIG_NETIF_NAMELENMAX];
 
     while(node) {
        netif_get_name((netif_t *)node, tmp);
-       if(strncmp(name, tmp, NETIF_NAMELENMAX) == 0) {
+       if(strncmp(name, tmp, CONFIG_NETIF_NAMELENMAX) == 0) {
            return (netif_t *)node;
        }
        node = node->next;

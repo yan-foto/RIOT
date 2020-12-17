@@ -27,7 +27,7 @@
 #endif  /* MODULE_GNRC_SIXLOWPAN_FRAG_STATS */
 #include "net/gnrc/sixlowpan/frag/vrb.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 static gnrc_sixlowpan_frag_vrb_t _vrb[CONFIG_GNRC_SIXLOWPAN_FRAG_VRB_SIZE];
@@ -96,10 +96,8 @@ gnrc_sixlowpan_frag_vrb_t *gnrc_sixlowpan_frag_vrb_add(
                         while (tmp->next != NULL) {
                             if (tmp == base->ints) {
                                 tmp = NULL;
+                                break;
                             }
-                            /* cppcheck-suppress nullPointer
-                             * (reason: possible bug in cppcheck, tmp can't
-                             * clearly be a NULL pointer here) */
                             tmp = tmp->next;
                         }
                         if (tmp != NULL) {

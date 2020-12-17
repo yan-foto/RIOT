@@ -14,6 +14,7 @@
  * @{
  */
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -23,7 +24,7 @@
 #include "log.h"
 #include "xtimer.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #if ENABLE_DEBUG
@@ -101,7 +102,7 @@ int hmc5883l_init(hmc5883l_t *dev, const hmc5883l_params_t *params)
 int hmc5883l_init_int(hmc5883l_t *dev, hmc5883l_drdy_int_cb_t cb, void *arg)
 {
     assert(dev != NULL);
-    assert(dev->int_pin != GPIO_UNDEF);
+    assert(gpio_is_valid(dev->int_pin));
     DEBUG_DEV("", dev);
 
     if (gpio_init_int(dev->int_pin, GPIO_IN, GPIO_FALLING, cb, arg)) {

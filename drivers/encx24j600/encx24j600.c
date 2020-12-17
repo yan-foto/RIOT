@@ -19,7 +19,6 @@
  * @}
  */
 
-#include <assert.h>
 #include <errno.h>
 
 #include "mutex.h"
@@ -33,7 +32,7 @@
 #include "net/eui64.h"
 #include "net/ethernet.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #define SPI_CLK                 SPI_CLK_1MHZ
@@ -50,7 +49,7 @@
 #define TX_BUFFER_END           (RX_BUFFER_START)
 #define TX_BUFFER_START         (TX_BUFFER_END - TX_BUFFER_LEN)
 
-static void cmd(encx24j600_t *dev, char cmd);
+static void cmd(encx24j600_t *dev, uint8_t cmd);
 static void reg_set(encx24j600_t *dev, uint8_t reg, uint16_t value);
 static uint16_t reg_get(encx24j600_t *dev, uint8_t reg);
 static void reg_clear_bits(encx24j600_t *dev, uint8_t reg, uint16_t mask);
@@ -163,8 +162,8 @@ static void phy_reg_set(encx24j600_t *dev, uint8_t reg, uint16_t value) {
     reg_set(dev, ENC_MIWR, value);
 }
 
-static void cmd(encx24j600_t *dev, char cmd) {
-    spi_transfer_byte(dev->spi, dev->cs, false, (uint8_t)cmd);
+static void cmd(encx24j600_t *dev, uint8_t cmd) {
+    spi_transfer_byte(dev->spi, dev->cs, false, cmd);
 }
 
 static void cmdn(encx24j600_t *dev, uint8_t cmd, char *out, char *in, int len) {

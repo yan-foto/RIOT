@@ -16,6 +16,8 @@
  * @author  Leandro Lanzieri <leandro.lanzieri@haw-hamburg.de>
  */
 
+#include <assert.h>
+
 #include "dtls.h"
 #include "log.h"
 #include "net/sock/dtls.h"
@@ -26,7 +28,7 @@
 #include "net/sock/async/event.h"
 #endif
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 #include "dtls_debug.h"
 
@@ -324,7 +326,7 @@ int sock_dtls_session_init(sock_dtls_t *sock, const sock_udp_ep_t *ep,
             return -EINVAL;
     }
 
-    /* prepare a the remote party to connect to */
+    /* prepare the remote party to connect to */
     memcpy(&remote->ep, ep, sizeof(sock_udp_ep_t));
     memcpy(&remote->dtls_session.addr, &ep->addr.ipv6, sizeof(ipv6_addr_t));
     _ep_to_session(ep, &remote->dtls_session);

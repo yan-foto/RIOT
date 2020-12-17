@@ -6,12 +6,13 @@
  * directory for more details.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <errno.h>
 
 #include "irq_handler.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /* Stack for the interrupt event handler thread */

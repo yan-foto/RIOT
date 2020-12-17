@@ -19,6 +19,8 @@
  * @}
  */
 
+#include <assert.h>
+
 #include "periph/rtt.h"
 #include "net/gnrc.h"
 #include "net/gnrc/lwmac/lwmac.h"
@@ -28,9 +30,6 @@
 #include "include/tx_state_machine.h"
 #include "include/lwmac_internal.h"
 
-#define ENABLE_DEBUG    (0)
-#include "debug.h"
-
 #ifndef LOG_LEVEL
 /**
  * @brief Default log level define
@@ -38,6 +37,9 @@
 #define LOG_LEVEL LOG_WARNING
 #endif
 #include "log.h"
+
+#define ENABLE_DEBUG 0
+#include "debug.h"
 
 /**
  * @brief   Flag to track if send packet success
@@ -685,6 +687,7 @@ static bool _lwmac_tx_update(gnrc_netif_t *netif)
                 LOG_WARNING("WARNING: [LWMAC-tx] No response from destination\n");
                 netif->mac.tx.state = GNRC_LWMAC_TX_STATE_FAILED;
                 reschedule = true;
+                netif->mac.tx.preamble_fail_counts++;
                 break;
             }
 
@@ -735,6 +738,7 @@ static bool _lwmac_tx_update(gnrc_netif_t *netif)
             if (tx_info & GNRC_LWMAC_TX_SUCCESS) {
                 netif->mac.tx.state = GNRC_LWMAC_TX_STATE_SEND_DATA;
                 reschedule = true;
+                netif->mac.tx.preamble_fail_counts = 0;
                 break;
             }
             else {

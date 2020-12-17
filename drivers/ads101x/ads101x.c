@@ -28,7 +28,7 @@
 #include "ads101x_params.h"
 #include "ads101x_regs.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #ifndef ADS101X_READ_DELAY
@@ -159,7 +159,7 @@ int ads101x_enable_alert(ads101x_alert_t *dev,
 {
     uint8_t regs[2];
 
-    if (dev->params.alert_pin == GPIO_UNDEF) {
+    if (!gpio_is_valid(dev->params.alert_pin)) {
         return ADS101X_OK;
     }
 

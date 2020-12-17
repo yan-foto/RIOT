@@ -12,6 +12,8 @@
  * @file
  */
 
+#include <assert.h>
+
 #include "kernel_types.h"
 #include "net/gnrc.h"
 #include "thread.h"
@@ -25,7 +27,7 @@
 #include "net/gnrc/netif.h"
 #include "net/sixlowpan.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 static kernel_pid_t _pid = KERNEL_PID_UNDEF;
@@ -310,7 +312,7 @@ static void *_event_loop(void *args)
 {
     msg_t msg, reply, msg_q[GNRC_SIXLOWPAN_MSG_QUEUE_SIZE];
     gnrc_netreg_entry_t me_reg = GNRC_NETREG_ENTRY_INIT_PID(GNRC_NETREG_DEMUX_CTX_ALL,
-                                                            sched_active_pid);
+                                                            thread_getpid());
 
     (void)args;
     msg_init_queue(msg_q, GNRC_SIXLOWPAN_MSG_QUEUE_SIZE);

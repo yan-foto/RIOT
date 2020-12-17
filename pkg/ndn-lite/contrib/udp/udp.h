@@ -6,8 +6,8 @@
  * directory for more details.
  */
 
-#ifndef NDN_UDP_FACE_H_
-#define NDN_UDP_FACE_H_
+#ifndef UDP_H
+#define UDP_H
 
 #include <ndn-lite/forwarder/forwarder.h>
 #include <ndn-lite/util/msg-queue.h>
@@ -22,35 +22,35 @@
 extern "C" {
 #endif
 
-/*
+/**
  * UDP face adaptation
  */
 typedef struct ndn_udp_face {
-	/*
-   * The inherited interface.
-   */
-	ndn_face_intf_t intf;
-	/*
-   * Local port used for UDP
-   */
-	uint16_t local_port;
-	/*
-   * Remote port used for UDP
-   */
-	uint16_t remote_port;
-	/*
-   * Remote address used for UDP.
-   * Should be IPv6 link-local multicast address
-   */
-	ipv6_addr_t remote_addr;
+    /**
+     * The inherited interface.
+     */
+    ndn_face_intf_t intf;
+    /**
+     * Local port used for UDP
+     */
+    uint16_t local_port;
+    /**
+     * Remote port used for UDP
+     */
+    uint16_t remote_port;
+    /**
+     * Remote address used for UDP.
+     * Should be IPv6 link-local multicast address
+     */
+    ipv6_addr_t remote_addr;
 } ndn_udp_face_t;
 
 ndn_udp_face_t *ndn_udp_face_construct(uint16_t local_port,
-				       ipv6_addr_t remote_addr,
-				       uint16_t remote_port);
+                                       ipv6_addr_t remote_addr,
+                                       uint16_t remote_port);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* UDP_H */

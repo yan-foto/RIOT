@@ -19,12 +19,11 @@
  * @}
  */
 
-#define ENABLE_DEBUG (0)
-#include "debug.h"
+#include <assert.h>
+#include <string.h>
+
 #include "esp_common.h"
 #include "log.h"
-
-#include <string.h>
 
 #include "cpu.h"
 #include "mutex.h"
@@ -32,6 +31,9 @@
 
 #include "esp_attr.h"
 #include "gpio_arch.h"
+
+#define ENABLE_DEBUG 0
+#include "debug.h"
 
 #ifdef MCU_ESP32
 

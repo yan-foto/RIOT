@@ -31,7 +31,7 @@
 #include "suit/policy.h"
 #include "suit.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 int suit_parse(suit_manifest_t *manifest, const uint8_t *buf,
@@ -42,8 +42,8 @@ int suit_parse(suit_manifest_t *manifest, const uint8_t *buf,
     manifest->buf = buf;
     manifest->len = len;
     nanocbor_decoder_init(&it, buf, len);
-    LOG_DEBUG("Starting container sequence handler\n");
+    LOG_DEBUG("Starting envelope sequence handler\n");
     return suit_handle_manifest_structure(manifest, &it,
-                                          suit_container_handlers,
-                                          suit_container_handlers_len);
+                                          suit_envelope_handlers,
+                                          suit_envelope_handlers_len);
 }

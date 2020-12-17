@@ -13,6 +13,7 @@
  * @author  Martine Lenders <m.lenders@fu-berlin.de>
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -46,6 +47,9 @@ int gnrc_ipv6_nib_nc_set(const ipv6_addr_t *ipv6, unsigned iface,
 #else
     (void)l2addr;
     (void)l2addr_len;
+    if (!ipv6_addr_is_link_local(ipv6)) {
+        return -EINVAL;
+    }
 #endif
     node->info &= ~(GNRC_IPV6_NIB_NC_INFO_AR_STATE_MASK |
                     GNRC_IPV6_NIB_NC_INFO_NUD_STATE_MASK);

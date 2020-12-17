@@ -38,7 +38,7 @@
 
 #include "net/gnrc/sixlowpan/iphc.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 /* dispatch byte definitions */
@@ -417,7 +417,7 @@ static size_t _iphc_ipv6_decode(const uint8_t *iphc_hdr,
                 ipv6_hdr->dst.u8[1] = iphc_hdr[payload_offset++];
                 ipv6_hdr->dst.u8[2] = iphc_hdr[payload_offset++];
                 ipv6_hdr->dst.u8[3] = ctx->prefix_len;
-                ipv6_addr_init_prefix((ipv6_addr_t *)ipv6_hdr->dst.u8 + 4,
+                ipv6_addr_init_prefix((ipv6_addr_t *)(ipv6_hdr->dst.u8 + 4),
                                       &ctx->prefix, ctx->prefix_len);
                 memcpy(ipv6_hdr->dst.u8 + 12, iphc_hdr + payload_offset + 2, 4);
 
@@ -797,8 +797,8 @@ void gnrc_sixlowpan_iphc_recv(gnrc_pktsnip_t *sixlo, void *rbuf_ptr,
                                                        ipv6))) {
             /* add netif header to `ipv6` so its flags can be used when
              * forwarding the fragment */
-            LL_DELETE(sixlo, netif);
-            LL_APPEND(ipv6, netif);
+            sixlo = gnrc_pkt_delete(sixlo, netif);
+            ipv6 = gnrc_pkt_append(ipv6, netif);
             /* provide space to copy remaining payload */
             if (gnrc_pktbuf_realloc_data(ipv6, uncomp_hdr_len + sixlo->size -
                                          payload_offset) != 0) {
@@ -862,8 +862,8 @@ void gnrc_sixlowpan_iphc_recv(gnrc_pktsnip_t *sixlo, void *rbuf_ptr,
 #endif  /* MODULE_GNRC_SIXLOWPAN_FRAG_VRB */
     }
     else {
-        LL_DELETE(sixlo, netif);
-        LL_APPEND(ipv6, netif);
+        sixlo = gnrc_pkt_delete(sixlo, netif);
+        ipv6 = gnrc_pkt_append(ipv6, netif);
         gnrc_sixlowpan_dispatch_recv(ipv6, NULL, page);
     }
     gnrc_pktbuf_release(sixlo);
@@ -1033,9 +1033,9 @@ static size_t _iphc_ipv6_encode(gnrc_pktsnip_t *pkt,
             iphc_hdr[inline_pos++] = (uint8_t)((ipv6_hdr_get_fl(ipv6_hdr) & 0x000f0000) >> 16);
         }
 
-        /* copy remaining byteos of flow label */
+        /* copy remaining bytes of flow label */
         iphc_hdr[inline_pos++] = (uint8_t)((ipv6_hdr_get_fl(ipv6_hdr) & 0x0000ff00) >> 8);
-        iphc_hdr[inline_pos++] = (uint8_t)((ipv6_hdr_get_fl(ipv6_hdr) & 0x000000ff) >> 8);
+        iphc_hdr[inline_pos++] = (uint8_t)(ipv6_hdr_get_fl(ipv6_hdr) & 0x000000ff);
     }
 
     /* check for compressible next header */

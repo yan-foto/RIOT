@@ -28,6 +28,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -39,7 +40,7 @@
 
 #include "ble-mac.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 #if defined(MODULE_OD) && ENABLE_DEBUG

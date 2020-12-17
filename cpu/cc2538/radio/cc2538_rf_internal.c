@@ -25,7 +25,7 @@
 #include "cc2538_rf_netdev.h"
 #include "cc2538_rf_internal.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 void isr_rfcoreerr(void)
@@ -64,10 +64,7 @@ void isr_rfcoreerr(void)
 
 void isr_rfcorerxtx(void)
 {
-    RFCORE_SFR_RFIRQF0 = 0;
-    RFCORE_SFR_RFIRQF1 = 0;
-
-   _irq_handler();
+    cc2538_irq_handler();
 
     cortexm_isr_end();
 }

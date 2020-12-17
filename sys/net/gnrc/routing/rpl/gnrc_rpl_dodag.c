@@ -16,6 +16,7 @@
  * @author      Cenk Gündoğan <cenk.guendogan@haw-hamburg.de>
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -33,7 +34,7 @@
 #include "net/gnrc/rpl/p2p_dodag.h"
 #endif
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG 0
 #include "debug.h"
 
 static char addr_str[IPV6_ADDR_MAX_STR_LEN];
@@ -64,6 +65,15 @@ static void _rpl_trickle_send_dio(void *args)
     gnrc_rpl_send_DIO(inst, (ipv6_addr_t *) &ipv6_addr_all_rpl_nodes);
     DEBUG("trickle callback: Instance (%d) | DODAG: (%s)\n", inst->id,
           ipv6_addr_to_str(addr_str,&dodag->dodag_id, sizeof(addr_str)));
+}
+
+/* The lifetime of the default route should exceed the parent timeout interval
+ * by the time we allow the node to probe its parent */
+static uint16_t _dflt_route_lifetime_sec(gnrc_rpl_dodag_t *dodag)
+{
+    return (dodag->default_lifetime * dodag->lifetime_unit) +
+           (GNRC_RPL_PARENT_TIMEOUT *
+            (GNRC_RPL_PARENT_PROBE_INTERVAL / MS_PER_SEC));
 }
 
 bool gnrc_rpl_instance_add(uint8_t instance_id, gnrc_rpl_instance_t **inst)
@@ -235,9 +245,8 @@ bool gnrc_rpl_parent_remove(gnrc_rpl_parent_t *parent)
 
         /* set the default route to the next parent for now */
         if (parent->next) {
-            gnrc_ipv6_nib_ft_add(NULL, 0,
-                                 &parent->next->addr, dodag->iface,
-                                 dodag->default_lifetime * dodag->lifetime_unit * MS_PER_SEC);
+            gnrc_ipv6_nib_ft_add(NULL, 0, &parent->next->addr, dodag->iface,
+                                 _dflt_route_lifetime_sec(dodag));
         }
     }
     LL_DELETE(dodag->parents, parent);
@@ -278,7 +287,7 @@ void gnrc_rpl_parent_update(gnrc_rpl_dodag_t *dodag, gnrc_rpl_parent_t *parent)
     if ((parent != NULL) && (parent->state != GNRC_RPL_PARENT_UNUSED)) {
         parent->state = GNRC_RPL_PARENT_ACTIVE;
         evtimer_del((evtimer_t *)(&gnrc_rpl_evtimer), (evtimer_event_t *)&parent->timeout_event);
-        ((evtimer_event_t *)&(parent->timeout_event))->offset = dodag->default_lifetime * dodag->lifetime_unit * MS_PER_SEC;
+        ((evtimer_event_t *)&(parent->timeout_event))->offset = (dodag->default_lifetime - 1) * dodag->lifetime_unit * MS_PER_SEC;
         parent->timeout_event.msg.type = GNRC_RPL_MSG_TYPE_PARENT_TIMEOUT;
         evtimer_add_msg(&gnrc_rpl_evtimer, &parent->timeout_event, gnrc_rpl_pid);
 #ifdef MODULE_GNRC_RPL_P2P
@@ -287,7 +296,7 @@ void gnrc_rpl_parent_update(gnrc_rpl_dodag_t *dodag, gnrc_rpl_parent_t *parent)
         if (parent == dodag->parents) {
             gnrc_ipv6_nib_ft_del(NULL, 0);
             gnrc_ipv6_nib_ft_add(NULL, 0, &parent->addr, dodag->iface,
-                                 dodag->default_lifetime * dodag->lifetime_unit);
+                                 _dflt_route_lifetime_sec(dodag));
         }
 #ifdef MODULE_GNRC_RPL_P2P
         }
