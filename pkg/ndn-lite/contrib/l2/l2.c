@@ -33,58 +33,48 @@
 
 #define MAX_NET_QUEUE_SIZE 16
 
-int ndn_l2_send_packet(kernel_pid_t pid, gnrc_pktsnip_t *pkt)
+int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packet, uint32_t size)
 {
-    /* allocate interface header */
-    gnrc_pktsnip_t *netface_hdr = gnrc_netif_hdr_build(NULL, 0, NULL, 0);
 
-    if (netface_hdr == NULL) {
-        NDN_LOG_ERROR(
-            "interface header allocation failed, dropping packet\n");
-        gnrc_pktbuf_release(pkt);
-        return -1;
-    }
+    ethernet_hdr_t hdr;
+    hdr.dst[0] = 0xff;
+    hdr.dst[1] = 0xff;
+    hdr.dst[2] = 0xff;
+    hdr.dst[3] = 0xff;
+    hdr.dst[4] = 0xff;
+    hdr.dst[5] = 0xff;
 
-    /* add interface header to packet */
-    LL_PREPEND(pkt, netface_hdr);
-    /* mark as broadcast */
-    ((gnrc_netif_hdr_t *)pkt->data)->flags |=
-        GNRC_NETIF_HDR_FLAGS_BROADCAST;
-    ((gnrc_netif_hdr_t *)pkt->data)->if_pid = pid;
-    /* send to interface */
-    if (gnrc_netapi_send(pid, pkt) < 1) {
-        NDN_LOG_ERROR("failed to send packet (netface=%" PRIkernel_pid
-                      ")\n",
-                      pid);
-        gnrc_pktbuf_release(pkt);
-        return -1;
-    }
+    ethernet_next_t hdr_pkt;
+    hdr_pkt.data = &hdr;
+    hdr_pkt.size = sizeof(hdr);
+    NDN_LOG_DEBUG("send: hdr size: %d\n", hdr_pkt.size);
 
-    NDN_LOG_DEBUG(
-        "successfully sent one gnrc packet (netface=%" PRIkernel_pid
-        ")\n",
-        pid);
-    NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
-    return 0;
+    memcpy(hdr.src, src_addr, ETHERNET_ADDR_LEN);
+
+    ethernet_next_t* pkt = malloc(sizeof(ethernet_next_t));
+
+    pkt->data = packet;
+    pkt->size = size;
+    NDN_LOG_DEBUG("send: pkt size: %d\n", pkt->size);
+
+    LL_PREPEND(pkt, &hdr_pkt);
+
+    return netdev->driver->send(netdev, (iolist_t*) pkt);
 }
 
-int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
-                          uint32_t data_size, uint16_t mtu)
+int ndn_l2_send_fragments(netdev_t *netdev, uint8_t *src_addr,
+                                const uint8_t *packet, uint32_t packet_size, uint16_t mtu)
 {
     if (mtu <= NDN_FRAG_HDR_LEN) {
         NDN_LOG_ERROR(
-            "MTU smaller than L2 fragmentation header size (iface=%" PRIkernel_pid
-            ")\n",
-            pid);
+            "MTU smaller than L2 fragmentation header size\n");
         return -1;
     }
 
-    int total_frags = data_size / (mtu - NDN_FRAG_HDR_LEN) + 1;
+    int total_frags = packet_size / (mtu - NDN_FRAG_HDR_LEN) + 1;
     if (total_frags > 32) {
         NDN_LOG_ERROR(
-            "ndn: too many fragments to send (iface=%" PRIkernel_pid
-            ")\n",
-            pid);
+            "ndn: too many fragments to send\n");
         return -1;
     }
 
@@ -93,7 +83,7 @@ int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
 
     uint16_t identifier = 0;
     ndn_rng((uint8_t *)&identifier, sizeof(identifier));
-    ndn_fragmenter_init(&fragmenter, data, data_size, mtu, identifier);
+    ndn_fragmenter_init(&fragmenter, packet, packet_size, mtu, identifier);
 
     while (fragmenter.counter < fragmenter.total_frag_num) {
         uint32_t size =
@@ -102,69 +92,29 @@ int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
              3) :
             mtu;
         ndn_fragmenter_fragment(&fragmenter, fragmented);
-        gnrc_pktsnip_t *pkt = gnrc_pktbuf_add(NULL, (void *)fragmented,
-                                              size, GNRC_NETTYPE_NDN);
-        if (pkt == NULL) {
-            NDN_LOG_ERROR(
-                "cannot create packet during sending fragments (iface=%" PRIkernel_pid
-                ")\n",
-                pid);
-            return -1;
-        }
 
-        if (ndn_l2_send_packet(pid, pkt) < 0) {
+        if (ndn_l2_send_packet(netdev, src_addr, fragmented, size) < 0) {
+            NDN_LOG_ERROR("fragment: error sending packet\n");
             return -1;
         }
 
         NDN_LOG_DEBUG("sent fragment (SEQ=%d, ID=%02X, "
-                      "size=%d, netface=%" PRIkernel_pid ")\n",
+                      "size=%d\n",
                       (int)fragmenter.counter,
-                      fragmenter.frag_identifier, (int)size, pid);
+                      fragmenter.frag_identifier, (int)size);
     }
     NDN_LOG_DEBUG("forwarder sending: %llu ms\n", ndn_time_now_ms());
     return 0;
 }
 
-int ndn_l2_process_packet(ndn_face_intf_t *self, gnrc_pktsnip_t *pkt)
+int ndn_l2_process_packet(ndn_face_intf_t *self, uint8_t *data, size_t length)
 {
-    size_t len = pkt->size;
-    uint8_t *buf = (uint8_t *)pkt->data;
-    ndn_netface_t *face = (ndn_netface_t *)self;
-
-    /* assuming this is an NDN packet, not NDN-over-UDP */
-    if (pkt == NULL || pkt->type != GNRC_NETTYPE_NDN) {
-        NDN_LOG_DEBUG("running on NDN-over-UDP overlay, discard\n");
-        return -1;
-    }
-
-    /* check if the packet starts with l2 fragmentation header */
-    if (buf[0] & NDN_FRAG_HB_MASK) {
-        uint16_t frag_id = (buf[1] << 8) + buf[2];
-        NDN_LOG_DEBUG("l2 fragment received (MF=%x, SEQ=%u, ID=%02x, "
-                      "packet size = %d, iface=%" PRIkernel_pid ")\n",
-                      (buf[0] & NDN_FRAG_MF_MASK) >> 5,
-                      buf[0] & NDN_FRAG_SEQ_MASK, frag_id, len,
-                      face->pid);
-        ndn_frag_assembler_assemble_frag(&face->assembler, buf, len);
-
-        /* release the gnrc packet */
-        gnrc_pktbuf_release(pkt);
-        if (face->assembler.is_finished) {
-            NDN_LOG_DEBUG("forwarder receiving: %llu ms\n",
-                          ndn_time_now_ms());
-            ndn_forwarder_receive(self, face->frag_buffer,
-                                  face->assembler.offset);
-            ndn_frag_assembler_init(&face->assembler,
-                                    face->frag_buffer,
-                                    sizeof(face->frag_buffer));
-        }
-    }
-
-    else {
-        NDN_LOG_DEBUG("forwarder receiving: %llu ms\n",
+    NDN_LOG_DEBUG("forwarder receiving: %llu ms\n",
                       ndn_time_now_ms());
-        ndn_forwarder_receive(self, buf, len);
-    }
+
+    int ret = ndn_forwarder_receive(self, data, length);
+
+    NDN_LOG_DEBUG("ndn_l2_process_packet: return value from forwarder_receive: %d\n", ret);
 
     return 0;
 }

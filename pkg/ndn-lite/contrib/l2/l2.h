@@ -27,11 +27,11 @@
 extern "C" {
 #endif
 
-int ndn_l2_send_packet(kernel_pid_t pid, gnrc_pktsnip_t *pkt);
+int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packet, uint32_t size);
 
-int ndn_l2_send_fragments(kernel_pid_t pid, const uint8_t *data,
-                          uint32_t data_size, uint16_t mtu);
-int ndn_l2_process_packet(ndn_face_intf_t *self, gnrc_pktsnip_t *pkt);
+int ndn_l2_send_fragments(netdev_t *netdev, uint8_t *src_addr,
+                                 const uint8_t *packet, uint32_t size, uint16_t mtu);
+int ndn_l2_process_packet(ndn_face_intf_t *self, uint8_t *data, size_t length);
 
 #ifdef __cplusplus
 }

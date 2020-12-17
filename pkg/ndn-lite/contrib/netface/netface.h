@@ -14,11 +14,22 @@
 #include <ndn-lite/forwarder/face.h>
 #include <ndn-lite/encode/fragmentation-support.h>
 
+#include "iolist.h"
+#include "net/ethernet.h"
+
 #include <kernel_types.h>
 #include <thread.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/**
+ * @brief   Length of the temporary copying buffer for receival.
+ * @note    It should be as long as the maximum packet length of all the netdev you use.
+ */
+#ifndef NETFACE_NETDEV_BUFLEN
+#define NETFACE_NETDEV_BUFLEN      (ETHERNET_MAX_LEN)
 #endif
 
 /**
@@ -47,12 +58,20 @@ typedef struct ndn_netface {
     kernel_pid_t pid;
 } ndn_netface_t;
 
+typedef struct ethernet_next {
+    struct ethernet_next *next;
+
+    const void *data;                     
+
+    size_t size;
+} ethernet_next_t;
+
 /*
  * Initializes the netif table and try to add existing
  * network devices into the netif and face tables.
  * @return the initialized netfaces.
  */
-uint32_t ndn_netface_auto_construct(void);
+int ndn_netface_auto_construct(void);
 
 #ifdef __cplusplus
 }
