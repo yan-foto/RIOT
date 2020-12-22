@@ -10,8 +10,7 @@ RIOTBASE ?= $(CURDIR)/../..
 USEPKG += ndn-lite
 
 # Modules to include:
-USEMODULE += gnrc_netdev_default
-USEMODULE += auto_init_gnrc_netif
+USEMODULE += netdev_default
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
@@ -22,7 +21,7 @@ DEVELHELP ?= 1
 QUIET ?= 1
 
 # Define thread sizes
-CFLAGS += -DTHREAD_STACKSIZE_MAIN=2048
+CFLAGS += -DTHREAD_STACKSIZE_MAIN=4096
 CFLAGS += -DTHREAD_STACKSIZE_NDN_LITE=8192
 CFLAGS += -DTHREAD_STACKSIZE_REGISTRATION=4096
 

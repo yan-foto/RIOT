@@ -11,6 +11,9 @@
 #include "netface/netface.h"
 #include "l2/l2.h"
 
+#include "netdev_tap_params.h"
+#include "thread.h"
+
 #include <ndn-lite/encode/fragmentation-support.h>
 #include <ndn-lite/forwarder/forwarder.h>
 #define ENABLE_NDN_LOG_ERROR 1
@@ -38,9 +41,25 @@
 #define MAX_GNRC_NETIFS (1)
 #endif
 
-static msg_t msg_q[MAX_NET_QUEUE_SIZE];
-static gnrc_netreg_entry_t me_reg;
+#ifndef NETFACE_NETDEV_BUFLEN
+#define NETFACE_NETDEV_BUFLEN      (ETHERNET_MAX_LEN)
+#endif
+
+#define NETFACE_NETDEV_STACKSIZE        (THREAD_STACKSIZE_DEFAULT)
+#define NETFACE_NETDEV_PRIO             (THREAD_PRIORITY_MAIN - 1)
+#define NETFACE_NETDEV_QUEUE_LEN        (8)
+#define NETFACE_NETDEV_MSG_TYPE_EVENT   0x1236
+
+static netdev_tap_t netdev_tap[NETDEV_TAP_MAX];
+static kernel_pid_t _pid = KERNEL_PID_UNDEF;
+static char _stack[NETFACE_NETDEV_STACKSIZE];
+static msg_t _queue[NETFACE_NETDEV_QUEUE_LEN];
+static uint8_t _recv_buf[NETFACE_NETDEV_BUFLEN];
+
 static ndn_netface_t _netface_table[MAX_GNRC_NETIFS];
+
+static void _event_cb(netdev_t *dev, netdev_event_t event);
+static void *_event_loop(void *arg);
 
 int ndn_netface_up(struct ndn_face_intf *self)
 {
@@ -64,7 +83,8 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
                      uint32_t size)
 {
     ndn_netface_t *phyface = (ndn_netface_t *)self;
-    kernel_pid_t pid = phyface->pid;
+
+    NDN_LOG_DEBUG("netface_send: size of sending packet: %d\n", size);
 
     if (phyface == NULL) {
         NDN_LOG_ERROR(
@@ -72,108 +92,65 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
             self->face_id);
     }
 
+    NDN_LOG_DEBUG("check the MTU size: %d\n", phyface->mtu);
+
     /* check mtu */
     if (size > phyface->mtu) {
-        return ndn_l2_send_fragments(pid, packet, size, phyface->mtu);
+        NDN_LOG_DEBUG("the packet will be fragmented\n");
+        return ndn_l2_send_fragments(&netdev_tap[0].netdev, netdev_tap[0].addr, packet, size, phyface->mtu);
     }
 
-    gnrc_pktsnip_t *pkt =
-        gnrc_pktbuf_add(NULL, packet, size, GNRC_NETTYPE_NDN);
-    if (pkt == NULL) {
-        NDN_LOG_ERROR(
-            "cannot create packet during sending (netface=%" PRIkernel_pid
-            ")\n",
-            pid);
-        return -1;
-    }
-    return ndn_l2_send_packet(pid, pkt);
+    int len;
+
+    len = ndn_l2_send_packet(&netdev_tap[0].netdev, netdev_tap[0].addr, packet, size);
+
+    NDN_LOG_DEBUG("number of bytes sent by netdev: %d\n", len);
+
+    return 1;
 }
 
 void ndn_netface_receive(void *self, size_t param_length, void *param)
 {
-    msg_t msg, reply;
+    int len = netdev_tap[0].netdev.driver->recv(&netdev_tap[0].netdev, _recv_buf, sizeof(_recv_buf), NULL);
 
-    /* preinitialize ACK to GET/SET commands*/
-    reply.type = GNRC_NETAPI_MSG_TYPE_ACK;
-    int ret = msg_try_receive(&msg);
-    if (ret == -1) {
-        ndn_msgqueue_post(self, ndn_netface_receive, param_length,
-                          param);
+    if (len == -1 ) {
+        NDN_LOG_DEBUG("netface_netdev: -1 case\n");
+        ndn_msgqueue_post(self, ndn_netface_receive, param_length, param);
         return;
     }
-
-    switch (msg.type) {
-    case GNRC_NETAPI_MSG_TYPE_RCV:
-        NDN_LOG_DEBUG("RCV message received from pid %" PRIkernel_pid
-                      "\n",
-                      msg.sender_pid);
-        ndn_l2_process_packet(self, (gnrc_pktsnip_t *)msg.content.ptr);
-        break;
-
-    case GNRC_NETAPI_MSG_TYPE_GET:
-    case GNRC_NETAPI_MSG_TYPE_SET:
-        reply.content.value = -ENOTSUP;
-        msg_reply(&msg, &reply);
-        break;
-    case GNRC_NETAPI_MSG_TYPE_SND:
-    default:
-        break;
-    }
+    assert(((unsigned)len) <= UINT16_MAX);
+    
+    NDN_LOG_DEBUG("message received\n");
+    ndn_l2_process_packet(self, _recv_buf, sizeof(_recv_buf));
 
     ndn_msgqueue_post(self, ndn_netface_receive, param_length, param);
 }
 
-uint32_t ndn_netface_auto_construct(void)
+int ndn_netface_auto_construct(void)
 {
-    /* set RIOT msg queue to receive link layer messages */
-    msg_init_queue(msg_q, MAX_NET_QUEUE_SIZE);
+    int res = 0;
 
-    me_reg.demux_ctx = GNRC_NETREG_DEMUX_CTX_ALL;
-    me_reg.target.pid = thread_getpid();
+    for (unsigned i = 0; i < NETDEV_TAP_MAX; i++) {
+        const netdev_tap_params_t *p = &netdev_tap_params[i];
 
-    /* register interest in all NDN packets */
-    gnrc_netreg_register(GNRC_NETTYPE_NDN, &me_reg);
+        NDN_LOG_DEBUG("[auto_init_netif] initializing netdev_tap #%u on TAP %s\n",
+                  i, *(p->tap_name));
 
-    /* initialize the netif table entry */
-    for (int i = 0; i < MAX_GNRC_NETIFS; ++i) {
-        _netface_table[i].intf.face_id = NDN_INVALID_ID;
-    }
+        netdev_tap_setup(&netdev_tap[i], p);
+        /* start multiplexing thread (only one needed) */
+        if (_pid <= KERNEL_PID_UNDEF) {
+            _pid = thread_create(_stack, NETFACE_NETDEV_STACKSIZE, NETFACE_NETDEV_PRIO,
+                                THREAD_CREATE_STACKTEST, _event_loop, NULL,
+                                "netface_netdev_thread");
 
-    /* get list of interfaces */
-    uint32_t netface_num = gnrc_netif_numof();
-    if (netface_num == 0) {
-        NDN_LOG_ERROR("no interfaces registered, cannot add netface\n");
-        return -1;
-    }
-
-    int i = -1;
-    gnrc_netif_t *netface = NULL;
-    while ((netface = gnrc_netif_iter(netface))) {
-        i++;
-        kernel_pid_t pid = netface->pid;
-        gnrc_nettype_t proto;
-        // get device mtu
-        if (gnrc_netapi_get(pid, NETOPT_MAX_PACKET_SIZE, 0,
-                            &_netface_table[i].mtu,
-                            sizeof(uint16_t)) < 0) {
-            NDN_LOG_ERROR(
-                "cannot get netface mtu (pid=%" PRIkernel_pid
-                ")\n",
-                pid);
-            continue;
-        }
-
-        // set device net proto to NDN
-        if (gnrc_netapi_get(pid, NETOPT_PROTO, 0, &proto,
-                            sizeof(proto)) == sizeof(proto)) {
-            // this device supports PROTO option
-            NDN_LOG_DEBUG("set device net proto to NDN\n");
-            if (proto != GNRC_NETTYPE_NDN) {
-                proto = GNRC_NETTYPE_NDN;
-                gnrc_netapi_set(pid, NETOPT_PROTO, 0, &proto,
-                                sizeof(proto));
+            if (_pid <= 0) {
+                NDN_LOG_DEBUG("Failed to create thread\n");
             }
+
         }
+        netdev_tap[i].netdev.driver->init(&netdev_tap[i].netdev);
+        netdev_tap[i].netdev.event_callback = _event_cb;
+        _netface_table[i].mtu = 1500;
 
         /* setting up forwarder face*/
         _netface_table[i].intf.state = NDN_FACE_STATE_DOWN;
@@ -183,7 +160,7 @@ uint32_t ndn_netface_auto_construct(void)
         _netface_table[i].intf.send = ndn_netface_send;
         _netface_table[i].intf.down = ndn_netface_down;
         _netface_table[i].intf.destroy = ndn_netface_destroy;
-        _netface_table[i].pid = pid;
+        _netface_table[i].pid = _pid;
 
         /* registering netface to forwarder */
         ndn_forwarder_register_face(&_netface_table[i].intf);
@@ -196,7 +173,70 @@ uint32_t ndn_netface_auto_construct(void)
         ndn_msgqueue_post(&_netface_table[i].intf, ndn_netface_receive,
                           0, NULL);
     }
-    return netface_num;
+    
+    if(res < 0) {
+        return res;
+    }
+
+    return res;
+}
+
+static void _event_cb(netdev_t *dev, netdev_event_t event)
+{
+    if (event == NETDEV_EVENT_ISR) {
+        assert(_pid != KERNEL_PID_UNDEF);
+        msg_t msg;
+
+        msg.type = NETFACE_NETDEV_MSG_TYPE_EVENT;
+        msg.content.ptr = dev;
+
+        if (msg_send(&msg, _pid) <= 0) {
+            NDN_LOG_DEBUG("netface_netdev: possibly lost interrupt.\n");
+        }
+    }
+    else {
+        switch (event) {
+            case NETDEV_EVENT_RX_COMPLETE: {
+                int len = dev->driver->recv(dev, _recv_buf, sizeof(_recv_buf), NULL);
+                NDN_LOG_DEBUG("rx_complete: size with _recv_buf :%d\n", len);
+                if (len < 0) {
+                    NDN_LOG_DEBUG("netface_netdev: error receiving packet\n");
+                    return;
+                }
+
+                NDN_LOG_DEBUG("netface_netdev: successufully read %d bytes\n", len);
+
+                size_t data_size = len - sizeof(ethernet_hdr_t);
+                NDN_LOG_DEBUG("data_size: %d\n", data_size);
+                uint8_t* packet = malloc(data_size);
+                memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
+
+                ndn_l2_process_packet(&_netface_table[0].intf, packet, data_size);
+                free(packet);
+                
+                break;
+            }
+            default:
+                NDN_LOG_DEBUG("netface_netdev: a different event occured: %d\n", event);
+                break;
+        }
+    }
+}
+
+static void *_event_loop(void *arg)
+{
+    NDN_LOG_DEBUG("THREAD start event loop\n");
+    (void)arg;
+    msg_init_queue(_queue, NETFACE_NETDEV_QUEUE_LEN);
+    while (1) {
+        msg_t msg;
+        msg_receive(&msg);
+        if (msg.type == NETFACE_NETDEV_MSG_TYPE_EVENT) {
+            netdev_t *dev = msg.content.ptr;
+            dev->driver->isr(dev);
+        }
+    }
+    return NULL;
 }
 
 ndn_netface_t *ndn_netface_get_list(void)
