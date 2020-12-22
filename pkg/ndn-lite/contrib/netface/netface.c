@@ -90,26 +90,30 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
     /* check mtu */
     if (size > phyface->mtu) {
         NDN_LOG_DEBUG("the packet will be fragmented\n");
-        return ndn_l2_send_fragments(&netdev_tap[0].netdev, netdev_tap[0].addr, packet, size, phyface->mtu);
+        return ndn_l2_send_fragments(&netdev_tap[0].netdev, netdev_tap[0].addr,
+                                     packet, size, phyface->mtu);
     }
 
     int len;
 
-    len = ndn_l2_send_packet(&netdev_tap[0].netdev, netdev_tap[0].addr, packet, size);
+    len = ndn_l2_send_packet(&netdev_tap[0].netdev, netdev_tap[0].addr, packet,
+                             size);
 
     return len;
 }
 
 void ndn_netface_receive(void *self, size_t param_length, void *param)
 {
-    int len = netdev_tap[0].netdev.driver->recv(&netdev_tap[0].netdev, _recv_buf, sizeof(_recv_buf), NULL);
+    int len = netdev_tap[0].netdev.driver->recv(&netdev_tap[0].netdev,
+                                                _recv_buf, sizeof(_recv_buf),
+                                                NULL);
 
-    if (len == -1 ) {
+    if (len == -1) {
         ndn_msgqueue_post(self, ndn_netface_receive, param_length, param);
         return;
     }
     assert(((unsigned)len) <= UINT16_MAX);
-    
+
     NDN_LOG_DEBUG("message received\n");
     ndn_l2_process_packet(self, _recv_buf, sizeof(_recv_buf));
 
@@ -123,15 +127,17 @@ int ndn_netface_auto_construct(void)
     for (unsigned i = 0; i < NETDEV_TAP_MAX; i++) {
         const netdev_tap_params_t *p = &netdev_tap_params[i];
 
-        NDN_LOG_DEBUG("[auto_init_netif] initializing netdev_tap #%u on TAP %s\n",
-                  i, *(p->tap_name));
+        NDN_LOG_DEBUG(
+            "[auto_init_netif] initializing netdev_tap #%u on TAP %s\n",
+            i, *(p->tap_name));
 
         netdev_tap_setup(&netdev_tap[i], p);
         /* start multiplexing thread (only one needed) */
         if (_pid <= KERNEL_PID_UNDEF) {
-            _pid = thread_create(_stack, NETFACE_NETDEV_STACKSIZE, NETFACE_NETDEV_PRIO,
-                                THREAD_CREATE_STACKTEST, _event_loop, NULL,
-                                "netface_netdev_thread");
+            _pid = thread_create(_stack, NETFACE_NETDEV_STACKSIZE,
+                                 NETFACE_NETDEV_PRIO,
+                                 THREAD_CREATE_STACKTEST, _event_loop, NULL,
+                                 "netface_netdev_thread");
 
             if (_pid <= 0) {
                 NDN_LOG_DEBUG("Failed to create thread\n");
@@ -163,8 +169,8 @@ int ndn_netface_auto_construct(void)
         ndn_msgqueue_post(&_netface_table[i].intf, ndn_netface_receive,
                           0, NULL);
     }
-    
-    if(res < 0) {
+
+    if (res < 0) {
         return res;
     }
 
@@ -186,30 +192,34 @@ static void _event_cb(netdev_t *dev, netdev_event_t event)
     }
     else {
         switch (event) {
-            case NETDEV_EVENT_RX_COMPLETE: {
-                int len = dev->driver->recv(dev, _recv_buf, sizeof(_recv_buf), NULL);
-                if (len < 0) {
-                    NDN_LOG_DEBUG("netface_netdev: error receiving packet\n");
-                    return;
-                }
-
-                size_t data_size = len - sizeof(ethernet_hdr_t);
-                
-                ethernet_hdr_t header;
-                uint8_t* packet = malloc(data_size);
-
-                memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
-                memcpy(&header, _recv_buf, sizeof(ethernet_hdr_t));
-
-                if (header.type.u16 == ETHERTYPE_NDN) 
-                    ndn_l2_process_packet(&_netface_table[0].intf, packet, data_size);
-                free(packet);
-                
-                break;
+        case NETDEV_EVENT_RX_COMPLETE: {
+            int len =
+                dev->driver->recv(dev, _recv_buf, sizeof(_recv_buf), NULL);
+            if (len < 0) {
+                NDN_LOG_DEBUG("netface_netdev: error receiving packet\n");
+                return;
             }
-            default:
-                NDN_LOG_DEBUG("netface_netdev: a different event occured: %d\n", event);
-                break;
+
+            size_t data_size = len - sizeof(ethernet_hdr_t);
+
+            ethernet_hdr_t header;
+            uint8_t *packet = malloc(data_size);
+
+            memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
+            memcpy(&header, _recv_buf, sizeof(ethernet_hdr_t));
+
+            if (header.type.u16 == ETHERTYPE_NDN) {
+                ndn_l2_process_packet(&_netface_table[0].intf, packet,
+                                      data_size);
+            }
+            free(packet);
+
+            break;
+        }
+        default:
+            NDN_LOG_DEBUG("netface_netdev: a different event occured: %d\n",
+                          event);
+            break;
         }
     }
 }

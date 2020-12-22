@@ -69,7 +69,7 @@ typedef struct ethernet_pkt {
     /**
      * ptr to this list entries data.
      */
-    const void *data;                     
+    const void *data;
     /**
      * size of data pointet to by ptr.
      */

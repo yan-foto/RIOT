@@ -24,10 +24,12 @@
 extern "C" {
 #endif
 
-int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packet, uint32_t size);
+int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr,
+                       const uint8_t *packet, uint32_t size);
 
 int ndn_l2_send_fragments(netdev_t *netdev, uint8_t *src_addr,
-                                 const uint8_t *packet, uint32_t size, uint16_t mtu);
+                          const uint8_t *packet, uint32_t size, uint16_t mtu);
+
 int ndn_l2_process_packet(ndn_face_intf_t *self, uint8_t *data, size_t length);
 
 #ifdef __cplusplus

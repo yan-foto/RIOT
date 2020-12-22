@@ -31,10 +31,12 @@
 
 #define MAX_NET_QUEUE_SIZE 16
 
-int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packet, uint32_t size)
+int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr,
+                       const uint8_t *packet, uint32_t size)
 {
 
     ethernet_hdr_t hdr;
+
     hdr.dst[0] = 0xff;
     hdr.dst[1] = 0xff;
     hdr.dst[2] = 0xff;
@@ -50,18 +52,19 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
 
     hdr.type.u16 = ETHERTYPE_NDN;
 
-    ethernet_pkt_t* pkt = malloc(sizeof(ethernet_pkt_t));
+    ethernet_pkt_t *pkt = malloc(sizeof(ethernet_pkt_t));
 
     pkt->data = packet;
     pkt->size = size;
 
     LL_PREPEND(pkt, &hdr_pkt);
 
-    return netdev->driver->send(netdev, (iolist_t*) pkt);
+    return netdev->driver->send(netdev, (iolist_t *)pkt);
 }
 
 int ndn_l2_send_fragments(netdev_t *netdev, uint8_t *src_addr,
-                                const uint8_t *packet, uint32_t packet_size, uint16_t mtu)
+                          const uint8_t *packet, uint32_t packet_size,
+                          uint16_t mtu)
 {
     if (mtu <= NDN_FRAG_HDR_LEN) {
         NDN_LOG_ERROR(
