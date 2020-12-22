@@ -42,7 +42,7 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
     hdr.dst[4] = 0xff;
     hdr.dst[5] = 0xff;
 
-    ethernet_next_t hdr_pkt;
+    ethernet_pkt_t hdr_pkt;
     hdr_pkt.data = &hdr;
     hdr_pkt.size = sizeof(hdr);
 
@@ -50,7 +50,7 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
 
     hdr.type.u16 = ETHERTYPE_NDN;
 
-    ethernet_next_t* pkt = malloc(sizeof(ethernet_next_t));
+    ethernet_pkt_t* pkt = malloc(sizeof(ethernet_pkt_t));
 
     pkt->data = packet;
     pkt->size = size;

@@ -61,11 +61,11 @@ typedef struct ndn_netface {
 /**
  * iolist_t compatible data structure for prepanding packages
  */
-typedef struct ethernet_next {
+typedef struct ethernet_pkt {
     /**
      * ptr to next list entry.
      */
-    struct ethernet_next *next;
+    struct ethernet_pkt *next;
     /**
      * ptr to this list entries data.
      */
@@ -74,7 +74,7 @@ typedef struct ethernet_next {
      * size of data pointet to by ptr.
      */
     size_t size;
-} ethernet_next_t;
+} ethernet_pkt_t;
 
 /*
  * Initializes the netif table and try to add existing
