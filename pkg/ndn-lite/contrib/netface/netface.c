@@ -81,15 +81,11 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
 {
     ndn_netface_t *phyface = (ndn_netface_t *)self;
 
-    NDN_LOG_DEBUG("netface_send: size of sending packet: %d\n", size);
-
     if (phyface == NULL) {
         NDN_LOG_ERROR(
             "no such physical netface, forwarder face_id  = %d\n",
             self->face_id);
     }
-
-    NDN_LOG_DEBUG("check the MTU size: %d\n", phyface->mtu);
 
     /* check mtu */
     if (size > phyface->mtu) {
@@ -101,9 +97,7 @@ int ndn_netface_send(struct ndn_face_intf *self, const uint8_t *packet,
 
     len = ndn_l2_send_packet(&netdev_tap[0].netdev, netdev_tap[0].addr, packet, size);
 
-    NDN_LOG_DEBUG("number of bytes sent by netdev: %d\n", len);
-
-    return 1;
+    return len;
 }
 
 void ndn_netface_receive(void *self, size_t param_length, void *param)
@@ -111,7 +105,6 @@ void ndn_netface_receive(void *self, size_t param_length, void *param)
     int len = netdev_tap[0].netdev.driver->recv(&netdev_tap[0].netdev, _recv_buf, sizeof(_recv_buf), NULL);
 
     if (len == -1 ) {
-        NDN_LOG_DEBUG("netface_netdev: -1 case\n");
         ndn_msgqueue_post(self, ndn_netface_receive, param_length, param);
         return;
     }
@@ -195,24 +188,18 @@ static void _event_cb(netdev_t *dev, netdev_event_t event)
         switch (event) {
             case NETDEV_EVENT_RX_COMPLETE: {
                 int len = dev->driver->recv(dev, _recv_buf, sizeof(_recv_buf), NULL);
-                NDN_LOG_DEBUG("rx_complete: size with _recv_buf :%d\n", len);
                 if (len < 0) {
                     NDN_LOG_DEBUG("netface_netdev: error receiving packet\n");
                     return;
                 }
 
-                NDN_LOG_DEBUG("netface_netdev: successufully read %d bytes\n", len);
-
                 size_t data_size = len - sizeof(ethernet_hdr_t);
-                NDN_LOG_DEBUG("data_size: %d\n", data_size);
                 
                 ethernet_hdr_t header;
                 uint8_t* packet = malloc(data_size);
 
                 memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
                 memcpy(&header, _recv_buf, sizeof(ethernet_hdr_t));
-
-                NDN_LOG_DEBUG("recv: this is the received packet type: %d\n", header.type.u16);
 
                 if (header.type.u16 == ETHERTYPE_NDN) 
                     ndn_l2_process_packet(&_netface_table[0].intf, packet, data_size);

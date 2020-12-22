@@ -45,7 +45,6 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
     ethernet_next_t hdr_pkt;
     hdr_pkt.data = &hdr;
     hdr_pkt.size = sizeof(hdr);
-    NDN_LOG_DEBUG("send: hdr size: %d\n", hdr_pkt.size);
 
     memcpy(hdr.src, src_addr, ETHERNET_ADDR_LEN);
 
@@ -55,7 +54,6 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
 
     pkt->data = packet;
     pkt->size = size;
-    NDN_LOG_DEBUG("send: pkt size: %d\n", pkt->size);
 
     LL_PREPEND(pkt, &hdr_pkt);
 
@@ -109,13 +107,9 @@ int ndn_l2_send_fragments(netdev_t *netdev, uint8_t *src_addr,
 
 int ndn_l2_process_packet(ndn_face_intf_t *self, uint8_t *data, size_t length)
 {
-    NDN_LOG_DEBUG("forwarder receiving: %llu ms\n",
-                      ndn_time_now_ms());
 
     int ret = ndn_forwarder_receive(self, data, length);
 
-    NDN_LOG_DEBUG("ndn_l2_process_packet: return value from forwarder_receive: %d\n", ret);
-
-    return 0;
+    return ret;
 }
 /** @} */
