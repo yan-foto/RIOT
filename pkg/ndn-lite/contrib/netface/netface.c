@@ -22,6 +22,7 @@
 #include <ndn-lite/util/logger.h>
 #include <ndn-lite/ndn-constants.h>
 
+#include <net/ethertype.h>
 #include <net/netopt.h>
 #include <kernel_types.h>
 #include <thread.h>
@@ -204,10 +205,17 @@ static void _event_cb(netdev_t *dev, netdev_event_t event)
 
                 size_t data_size = len - sizeof(ethernet_hdr_t);
                 NDN_LOG_DEBUG("data_size: %d\n", data_size);
+                
+                ethernet_hdr_t header;
                 uint8_t* packet = malloc(data_size);
-                memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
 
-                ndn_l2_process_packet(&_netface_table[0].intf, packet, data_size);
+                memcpy(packet, _recv_buf + sizeof(ethernet_hdr_t), data_size);
+                memcpy(&header, _recv_buf, sizeof(ethernet_hdr_t));
+
+                NDN_LOG_DEBUG("recv: this is the received packet type: %d\n", header.type.u16);
+
+                if (header.type.u16 == ETHERTYPE_NDN) 
+                    ndn_l2_process_packet(&_netface_table[0].intf, packet, data_size);
                 free(packet);
                 
                 break;

@@ -19,6 +19,7 @@
 #include <ndn-lite/ndn-constants.h>
 #include <ndn-lite/security/ndn-lite-rng.h>
 
+#include <net/ethertype.h>
 #include <net/netdev.h>
 #include <utlist.h>
 #include <kernel_types.h>
@@ -47,6 +48,8 @@ int ndn_l2_send_packet(netdev_t *netdev, uint8_t *src_addr, const uint8_t *packe
     NDN_LOG_DEBUG("send: hdr size: %d\n", hdr_pkt.size);
 
     memcpy(hdr.src, src_addr, ETHERNET_ADDR_LEN);
+
+    hdr.type.u16 = ETHERTYPE_NDN;
 
     ethernet_next_t* pkt = malloc(sizeof(ethernet_next_t));
 
