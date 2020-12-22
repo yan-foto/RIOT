@@ -21,5 +21,4 @@ void ndn_lite_startup(void)
     ndn_security_init();
     ndn_forwarder_init();
     ndn_netface_auto_construct();
-    // ndn_netface_traverse_print();
 }

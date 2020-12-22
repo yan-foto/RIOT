@@ -8,13 +8,7 @@
  * See AUTHORS.md for complete list of NDN IOT PKG authors and contributors.
  */
 
-#include <net/gnrc/netapi.h>
-#include <net/gnrc/netif.h>
-#include <net/gnrc/netreg.h>
-
 #include <ndn-lite/forwarder/forwarder.h>
 #include <ndn-lite/security/ndn-lite-sec-config.h>
-
-#define GNRC_NDN_LITE_MSG_QUEUE_SIZE (8U)
 
 void ndn_lite_startup(void);

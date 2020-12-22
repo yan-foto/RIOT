@@ -23,10 +23,6 @@
 #include <ndn-lite/ndn-constants.h>
 
 #include <net/netopt.h>
-#include <net/gnrc/netapi.h>
-#include <net/gnrc/netif.h>
-#include <net/gnrc/netif/hdr.h>
-#include <net/gnrc/netreg.h>
 #include <kernel_types.h>
 #include <thread.h>
 #include <timex.h>
