@@ -31,10 +31,10 @@
 
 #define MAX_NET_QUEUE_SIZE 8
 /**
- * @brief Max number of GNRC network interfaces
+ * @brief Max number of network interfaces
  */
-#ifndef MAX_GNRC_NETIFS
-#define MAX_GNRC_NETIFS (1)
+#ifndef MAX_NETIFS
+#define MAX_NETIFS (1)
 #endif
 
 #ifndef NETFACE_NETDEV_BUFLEN
@@ -52,7 +52,7 @@ static char _stack[NETFACE_NETDEV_STACKSIZE];
 static msg_t _queue[NETFACE_NETDEV_QUEUE_LEN];
 static uint8_t _recv_buf[NETFACE_NETDEV_BUFLEN];
 
-static ndn_netface_t _netface_table[MAX_GNRC_NETIFS];
+static ndn_netface_t _netface_table[MAX_NETIFS];
 
 static void _event_cb(netdev_t *dev, netdev_event_t event);
 static void *_event_loop(void *arg);
