@@ -58,11 +58,21 @@ typedef struct ndn_netface {
     kernel_pid_t pid;
 } ndn_netface_t;
 
+/**
+ * iolist_t compatible data structure for prepanding packages
+ */
 typedef struct ethernet_next {
+    /**
+     * ptr to next list entry.
+     */
     struct ethernet_next *next;
-
+    /**
+     * ptr to this list entries data.
+     */
     const void *data;                     
-
+    /**
+     * size of data pointet to by ptr.
+     */
     size_t size;
 } ethernet_next_t;
 
